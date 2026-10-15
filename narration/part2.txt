@@ -1,0 +1,7 @@
+Let's look at this very straightforward example of a car starting from rest, driving 250 metres in 10 seconds and stopping at the end. Studying cars or more generally the speed of objects would undoubtedly be a very good reason to invent new mathematics. So what can we say about this moving car with the maths we already know?
+
+Well, we can say that it took 10 seconds to cover 250 metres. We know that the car started at rest and braked to a stop at the end, and that the distance-time graph couldn't possibly be a straight line, because that means the car had a constant speed for the entire duration, which would imply infinite acceleration, which we know is not possible. So a more realistic curve would be one that starts out flat, where the car is still, gets steeper as the car speeds up, and flattens out again at the end as it brakes. The steeper the graph, the faster the car.
+
+And another thing we can say is that the average speed of this car was 250 metres divided by 10 seconds, meaning 25 m/s. This is also exactly the gradient of the straight line from the start of the trip to the end, when we compute it by the formula we already know, which is rise over run. That's no coincidence: rise is distance, run is time, and distance over time is speed.
+
+But let's play this again, now looking at the speedometer inside the car. How does this speedometer compute the speed at every instant? Can the maths we already know help us with this?
