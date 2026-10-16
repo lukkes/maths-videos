@@ -29,7 +29,6 @@ class Part2(LessonScene):
         self.p1 = self.axes.c2p(T_TOTAL, D_TOTAL)
 
         self.row_2_1()
-        self.row_2_2()
         self.row_2_3()
         self.row_2_4()
         self.row_2_5()
@@ -50,22 +49,11 @@ class Part2(LessonScene):
         self.span("a car starting from rest", "stopping at the end", self.drive_to(T_TOTAL), rate_func=linear)
 
     # ------------------------------------------------------------------
-    # 2.2  Other things that move
-    # ------------------------------------------------------------------
-    def row_2_2(self):
-        self.row("2.2_why_motion", "Studying cars")
-        ball, ball_motion = thrown_ball(center=np.array([-3.2, -1.3, 0]))
-        orbit, orbit_motion = planet_orbit(center=np.array([3.2, -1.3, 0]))
-        self.vignettes = VGroup(ball, orbit)
-        self.at("Studying cars", FadeIn(self.vignettes))
-        self.span("or more generally", "invent new mathematics", ball_motion, orbit_motion, rate_func=linear)
-
-    # ------------------------------------------------------------------
     # 2.3  The empty graph; car back to the start
     # ------------------------------------------------------------------
     def row_2_3(self):
         self.row("2.3_what_can_we_say", "So what can we say")
-        self.at("So what can we say", FadeOut(self.vignettes), Create(self.axes), FadeIn(self.axis_labels),
+        self.at("So what can we say", Create(self.axes), FadeIn(self.axis_labels),
                 run_time=1.2)
         self.at("this moving car", self.drive_to(0), run_time=1.2, rate_func=smooth)
 
@@ -111,6 +99,8 @@ class Part2(LessonScene):
         self.tracker.begin(self)
         self.span("starts out flat", "as it brakes", self.drive_to(T_TOTAL), rate_func=linear)
         self.tracker.settle(self)
+        steep = self.axes.plot(s, x_range=[3, 7], color=GOLD, stroke_width=9).set_z_index(3)
+        self.at("the faster the car", ShowPassingFlash(steep, time_width=0.6), run_time=1.0)   # the steep part glows
 
     # ------------------------------------------------------------------
     # 2.7  Average speed
@@ -135,6 +125,7 @@ class Part2(LessonScene):
                 ReplacementTransform(dist_val, frac[0]), ReplacementTransform(time_val, frac[2]),
                 Create(frac[1]), run_time=1.4)
         self.at("meaning twenty", FadeIn(self.chain["eq3"]), FadeIn(self.chain["result"], shift=LEFT * 0.2))
+        self.play(self.chain["result"].animate(rate_func=there_and_back).scale(1.18), run_time=0.5)   # small pop
 
     def build_formula_chain(self):
         """gradient(A) = rise/run = 250 m / 10 s = 25 m/s, plus its heading."""
@@ -200,20 +191,3 @@ class Part2(LessonScene):
 # 2.2 vignettes: small, flat, same palette as the car. Each returns
 # (mobjects, animation of the motion).
 # ----------------------------------------------------------------------
-def thrown_ball(center, width=4.2, height=1.7):
-    ground = Line(center + np.array([-width / 2, -1.0, 0]), center + np.array([width / 2, -1.0, 0]),
-                  color=INK, stroke_width=2)
-    start = center + np.array([-width / 2 + 0.3, -1.0, 0])
-    path = ParametricFunction(lambda u: start + np.array([u * (width - 0.6), 4 * height * u * (1 - u), 0]),
-                              t_range=[0, 1], color=MUTED, stroke_width=2)
-    ball = Dot(start, radius=0.11, color=CURVE)
-    label = txt("a thrown ball", SIZE_TICK, MUTED).next_to(ground, DOWN, buff=0.18)
-    return VGroup(ground, DashedVMobject(path, num_dashes=28), ball, label), MoveAlongPath(ball, path)
-
-
-def planet_orbit(center):
-    sun = Dot(center, radius=0.16, color=GOLD)
-    ring = Ellipse(width=3.2, height=1.9, color=MUTED, stroke_width=2).move_to(center)
-    planet = Dot(ring.point_from_proportion(0), radius=0.09, color=CURVE)
-    label = txt("a planet in orbit", SIZE_TICK, MUTED).next_to(ring, DOWN, buff=0.18)
-    return VGroup(ring, sun, planet, label), MoveAlongPath(planet, ring)

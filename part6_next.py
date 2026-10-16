@@ -1,6 +1,6 @@
 """
-Part 6: storyboard rows 6.1 to 6.5. What comes next: the power rule for any
-power, three places derivatives get used, and integration. Ends on the end card.
+Part 6: storyboard rows 6.1, 6.2, 6.4 and 6.5. What comes next: the power rule
+for any power, then integration. Ends on the end card.
 
 Opens on part 5's last frame (built by part5_ending()).
 
@@ -12,8 +12,6 @@ from style import *
 from part4b_limit import general_definition, power_rule_parts, power_rule_steps
 from part5_twice import part5_ending
 
-CARD_SIZE = (4.1, 3.3)
-CARD_XS = (-4.55, 0.0, 4.55)
 
 
 def algebra_page():
@@ -27,54 +25,6 @@ def algebra_page():
     cols[1].move_to([4.0, 0, 0])
     page = cols.set_opacity(0.55).set_z_index(-2)
     return page.next_to([0, -4.2, 0], DOWN, buff=0)
-
-
-def plot_card(center, f, x_range, y_range, x_title, y_title, label):
-    """A small paper card with a graph and a label underneath: (card group, axes, curve)."""
-    w, h = CARD_SIZE
-    paper = RoundedRectangle(corner_radius=0.12, width=w, height=h, fill_color=PAPER, fill_opacity=1,
-                             stroke_width=0).move_to(center)
-    axes = Axes(x_range=[*x_range, (x_range[1] - x_range[0]) / 5], y_range=[*y_range, (y_range[1] - y_range[0]) / 4],
-                x_length=w - 1.0, y_length=h - 1.45, tips=False,
-                axis_config={"color": INK, "stroke_width": 2, "include_ticks": False})
-    axes.move_to(paper.get_center() + UP * 0.3 + RIGHT * 0.1)
-    titles = VGroup(txt(y_title, SIZE_TICK - 2, MUTED).next_to(axes, UP, buff=0.08).align_to(axes, LEFT),
-                    txt(x_title, SIZE_TICK - 2, MUTED).next_to(axes, DOWN, buff=0.08).align_to(axes, RIGHT))
-    curve = axes.plot(f, x_range=[*x_range, (x_range[1] - x_range[0]) / 200], color=CURVE, stroke_width=4)
-    name = txt(label, SIZE_LABEL, AVG, BOLD).move_to([center[0], paper.get_bottom()[1] + 0.35, 0])
-    return VGroup(paper, axes, titles, curve, name), axes, curve
-
-
-def sliding_tangent(axes, f, x: ValueTracker, color=GOLD, half=0.65):
-    """A short tangent to f that follows the x tracker."""
-    def now():
-        x0 = x.get_value()
-        slope = (f(x0 + 1e-4) - f(x0 - 1e-4)) / 2e-4
-        p, q = axes.c2p(x0, f(x0)), axes.c2p(x0 + 1, f(x0) + slope)
-        d = (q - p) / np.linalg.norm(q - p)
-        return VGroup(Line(p - d * half, p + d * half, color=color, stroke_width=4),
-                      Dot(p, radius=0.06, color=color)).set_z_index(4)
-    return always_redraw(now)
-
-
-def profit(p):
-    return 25 - (p - 5) ** 2
-
-
-CAN_VOLUME = 1.0
-
-
-def metal(r):
-    """Surface area of a closed can of fixed volume, against its radius."""
-    return 2 * PI * r**2 + 2 * CAN_VOLUME / r
-
-
-def medicine(t):
-    return 100 * np.exp(-0.35 * t)
-
-
-NEXT_DOSE = 20
-T_DOSE = np.log(100 / NEXT_DOSE) / 0.35
 
 
 def end_card():
@@ -97,7 +47,6 @@ class Part6(LessonScene):
         self.add(self.ending5)
         self.row_6_1()
         self.row_6_2()
-        self.row_6_3()
         self.row_6_4()
         self.row_6_5()
 
@@ -111,8 +60,7 @@ class Part6(LessonScene):
         page = algebra_page()
         self.add(page)
         self.at("And that's it for this video", FadeOut(self.ending5), FadeIn(backing), FadeIn(self.definition),
-                run_time=0.5)
-        self.play(page.animate.shift(UP * (page.height + 8.4)), run_time=1.1, rate_func=linear)
+                page.animate(rate_func=linear).shift(UP * (page.height + 8.4)), run_time=1.4)
         self.remove(page, backing)
 
     # ------------------------------------------------------------------
@@ -148,41 +96,6 @@ class Part6(LessonScene):
         self.next_bits = VGroup(d, step, card, inner, arrow)
 
     # ------------------------------------------------------------------
-    # 6.3  Three places derivatives get used
-    # ------------------------------------------------------------------
-    def row_6_3(self):
-        self.row("6.3_put_to_work", "Then we'll put derivatives to work")
-        self.at("Then we'll put derivatives to work", FadeOut(self.next_bits))
-
-        c1, ax1, _ = plot_card([CARD_XS[0], 0.2, 0], profit, (0, 10), (0, 28), "price", "profit", "best price")
-        x1 = ValueTracker(1.5)
-        t1 = sliding_tangent(ax1, profit, x1)
-        self.at("find the price", FadeIn(c1, shift=UP * 0.15), run_time=0.7)
-        self.add(t1)
-        self.at("the most profit", x1.animate.set_value(5.0), run_time=1.0)
-
-        c2, ax2, _ = plot_card([CARD_XS[1], 0.2, 0], metal, (0.25, 1.5), (0, 17), "radius", "metal", "least metal")
-        x2 = ValueTracker(1.3)
-        t2 = sliding_tangent(ax2, metal, x2)
-        self.at("design a drink can", FadeIn(c2, shift=UP * 0.15), run_time=0.7)
-        self.add(t2)
-        self.at("using the least metal", x2.animate.set_value((CAN_VOLUME / (2 * PI)) ** (1 / 3)), run_time=1.0)
-
-        c3, ax3, _ = plot_card([CARD_XS[2], 0.2, 0], medicine, (0, 10), (0, 105), "hours", "medicine", "next dose")
-        x3 = ValueTracker(0.6)
-        t3 = sliding_tangent(ax3, medicine, x3, color=AVG)
-        dose_line = DashedLine(ax3.c2p(0, NEXT_DOSE), ax3.c2p(10, NEXT_DOSE), color=MUTED, stroke_width=2,
-                               dash_length=0.07)
-        dose_dot = Dot(ax3.c2p(T_DOSE, NEXT_DOSE), radius=0.08, color=GOLD).set_z_index(5)
-        name = c3[-1]
-        c3.remove(name)
-        self.at("how doctors work out", FadeIn(c3, shift=UP * 0.15), run_time=0.7)
-        self.add(t3)
-        self.span("how quickly a medicine is leaving", "your bloodstream", x3.animate.set_value(T_DOSE))
-        self.at("the next dose is due", Create(dose_line), FadeIn(dose_dot, scale=0.5), FadeIn(name))
-        self.cards = VGroup(c1, c2, c3, name, t1, t2, t3, dose_line, dose_dot)
-
-    # ------------------------------------------------------------------
     # 6.4  The reverse question: from speed back to distance
     # ------------------------------------------------------------------
     def row_6_4(self):
@@ -197,7 +110,7 @@ class Part6(LessonScene):
         x_arrow = dist.get_right()[0] + 0.55
         up = Arrow([x_arrow, speed.get_center()[1], 0], [x_arrow, dist.get_center()[1], 0], buff=0.3,
                    color=AVG, stroke_width=4, max_tip_length_to_length_ratio=0.1)
-        self.at("And then there's the reverse question", FadeOut(self.cards), Create(dist), Create(speed),
+        self.at("And then there's the reverse question", FadeOut(self.next_bits), Create(dist), Create(speed),
                 FadeIn(titles), run_time=0.7)
         self.at("the reverse question", GrowArrow(up))
 
@@ -221,9 +134,11 @@ class Part6(LessonScene):
                                 .move_to(speed.c2p(5, 17)))
         self.add(shade, trace, dot, readout)
         self.span("how far you've gone", "other half of calculus", u.animate.set_value(T_TOTAL), rate_func=linear)
+        check = tick_mark(0.2).next_to(speed.c2p(5, 17), RIGHT, buff=0.55)
         name = txt("integration", SIZE_LABEL + 4, AVG, BOLD).next_to(up, RIGHT, buff=0.25)
-        self.at("called integration", FadeIn(name, shift=LEFT * 0.1))
-        self.integration = VGroup(dist, speed, titles, up, vcurve, shade, trace, dot, readout, name)
+        self.at("called integration", FadeIn(name, shift=LEFT * 0.1), Create(check),     # 250 m: the whole trip
+                Indicate(dot, scale_factor=1.8, color=CURVE))
+        self.integration = VGroup(dist, speed, titles, up, vcurve, shade, trace, dot, readout, check, name)
 
     # ------------------------------------------------------------------
     # 6.5  End card (no narration)

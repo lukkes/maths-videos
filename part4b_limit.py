@@ -133,29 +133,27 @@ class Part4b(LessonScene):
     def row_4_22(self):
         self.row("4.22_windows_before", "Now, the curious among us")
         e = self.e
-        self.at("Now, the curious among us", self.h.animate.set_value(0.1), run_time=0.8)
+        self.at("Now, the curious among us", self.h.animate.set_value(0.1), run_time=0.6)
         line, dot = self.secants.add_side(-1)
-        self.at("check intervals before", FadeIn(dot), Create(line), run_time=1.0)
+        self.at("check intervals before", FadeIn(dot), Create(line), run_time=0.8)
         self.sub_before = tex("40", "-", "5h", color=GOLD)
-        self.at("and you get forty minus", FadeIn(self.sub_before.move_to([PANEL_X - 1.3, SUB_Y, 0])))
-        self.at("A tenth of a second before", self.table.add_column("before", BEFORE_VALUES, GOLD),
-                run_time=1.2)
-        self.span("a hundredth gives", "point nine nine five", self.h.animate.set_value(0.001))
+        self.at("our t equals four", FadeIn(self.sub_before.move_to([PANEL_X - 1.3, SUB_Y, 0])),
+                self.table.add_column("before", BEFORE_VALUES, GOLD), run_time=1.0)
+        self.span("seconds point", "see what happens", self.h.animate.set_value(0.001))
 
     # ------------------------------------------------------------------
     # 4.23  The speed is trapped between the two columns
     # ------------------------------------------------------------------
     def row_4_23(self):
-        self.row("4.23_trapped", "The averages from before")
+        self.row("4.23_trapped", "Since the car is speeding up")
         self.trap = TrapLine(39.4, 40.6, center=[PANEL_X + 0.3, TRAP_Y, 0], length=4.6,
                              ticks=[39.5, 40.0, 40.5], decimals=1)
         self.trap.set(39.5, 40.5)
-        self.at("its speed at the instant must sit between",
+        self.at("Since the car is speeding up",
                 Create(self.trap.line), FadeIn(self.trap.labels), FadeIn(self.trap.band), run_time=1.0)
         self.trapped = txt("trapped between the two columns", SIZE_LABEL, GOLD, BOLD).move_to([PANEL_X + 0.3, -2.8, 0])
-        self.at("trapped between the two columns", self.trap.squeeze(39.95, 40.05), FadeIn(self.trapped),
-                run_time=1.0)
-        self.at("traps it even tighter", self.trap.squeeze(39.995, 40.005), run_time=1.0)
+        self.at("must sit between", self.trap.squeeze(39.95, 40.05), FadeIn(self.trapped), run_time=1.0)
+        self.at("the average just before", self.trap.squeeze(39.995, 40.005), run_time=1.0)
 
     # ------------------------------------------------------------------
     # 4.24  Only 40 survives every row; 40.001 drops out
@@ -166,6 +164,7 @@ class Part4b(LessonScene):
         one = txt("one number", SIZE_LABEL, ACCENT, BOLD).next_to(forty, LEFT, buff=0.35)
         self.at("exactly one number", FadeOut(self.trapped), FadeIn(one))
         self.at("and that number is forty", FadeIn(forty, shift=DOWN * 0.1))
+        self.play(Flash(forty[0], color=ACCENT, line_length=0.12, flash_radius=0.2), run_time=0.5)
 
         fine = TrapLine(39.998, 40.002, center=[PANEL_X + 0.3, TRAP_Y, 0], length=4.6,
                         ticks=[39.999, 40.0, 40.001], decimals=3)
@@ -241,10 +240,12 @@ class Part4b(LessonScene):
                   rate_func=smooth)
         za = self.zaxes
         (xa, ya), (xb, yb) = clipped_line_points(za, T0, F(T0), 10 * T0, 2.0)
-        tline = Line(za.c2p(xa, ya), za.c2p(xb, yb), color=INK, stroke_width=3.5).set_z_index(5)
-        tlabel = txt("tangent", SIZE_LABEL + 4, INK, BOLD).move_to(za.c2p(1.6, 150))
+        tline = DashedLine(za.c2p(xa, ya), za.c2p(xb, yb), color=ACCENT, stroke_width=4,
+                           dash_length=0.07, dashed_ratio=0.55).set_z_index(5)
+        tlabel = txt("tangent", SIZE_LABEL + 4, ACCENT, BOLD).move_to(za.c2p(1.6, 150))
         still = self.secants.freeze(self)
         self.at("That line is the tangent", FadeOut(still), Create(tline), FadeIn(tlabel), run_time=1.0)
+        self.play(Flash(za.c2p(T0, F(T0)), color=ACCENT, line_length=0.15, flash_radius=0.25), run_time=0.5)
         self.tangent = VGroup(tline, tlabel)
 
     # ------------------------------------------------------------------

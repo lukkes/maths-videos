@@ -132,14 +132,121 @@ def road_point(d):
     return np.array([interpolate(ROAD_X0, ROAD_X1, d / D_TOTAL), ROAD_Y, 0])
 
 
+# Scenery behind the road: low-contrast colours so the car, road and clock stay on top.
+SKY = "#D5E3EA"
+MOUNTAIN_FAR = "#C3D1D6"
+MOUNTAIN_NEAR = "#B3C2C2"
+PINE = "#8FA889"
+PINE_DARK = "#7E9878"
+POLE = "#9A8B7A"
+WIRE = "#7D776F"
+
+
+def pine_tree(base, height):
+    """A pine: three stacked triangles on a short trunk, standing on `base`."""
+    w = height * 0.55
+    trunk = Rectangle(width=w * 0.14, height=height * 0.16, fill_color=POLE, fill_opacity=1, stroke_width=0)
+    trunk.move_to(base, aligned_edge=DOWN)
+    tiers = VGroup()
+    for k, (frac_w, y0, y1) in enumerate([(1.0, 0.12, 0.55), (0.8, 0.35, 0.8), (0.58, 0.58, 1.0)]):
+        tiers.add(Polygon(base + np.array([-w * frac_w / 2, height * y0, 0]),
+                          base + np.array([w * frac_w / 2, height * y0, 0]),
+                          base + np.array([0, height * y1, 0]),
+                          fill_color=PINE if k % 2 == 0 else PINE_DARK, fill_opacity=1, stroke_width=0))
+    return VGroup(trunk, tiers)
+
+
+def mountain_range(y0, peaks, color, seed):
+    """A ridge from the left edge of the screen to the right, `peaks` high points, base at y0."""
+    rng = np.random.default_rng(seed)
+    x0, x1 = -config.frame_width / 2, config.frame_width / 2
+    xs = np.linspace(x0, x1, 2 * peaks + 1)
+    ys = [y0 + (rng.uniform(0.45, 0.85) if i % 2 else rng.uniform(0.1, 0.3)) for i in range(len(xs))]
+    pts = [np.array([x0, y0, 0])] + [np.array([x, y, 0]) for x, y in zip(xs, ys)] + [np.array([x1, y0, 0])]
+    ridge = Polygon(*pts, fill_color=color, fill_opacity=1, stroke_width=0)
+    ridge.bleed = True
+    return ridge
+
+
+def power_lines(y0, xs, height=0.85):
+    """Poles at the given x positions, joined by two wires that sag a little between poles."""
+    poles, wires = VGroup(), VGroup()
+    tops = []
+    for x in xs:
+        pole = Line([x, y0, 0], [x, y0 + height, 0], color=POLE, stroke_width=3)
+        arm = Line([x - 0.16, y0 + height - 0.08, 0], [x + 0.16, y0 + height - 0.08, 0], color=POLE, stroke_width=3)
+        poles.add(pole, arm)
+        tops.append((x, y0 + height - 0.08))
+    for (xa, ya), (xb, yb) in zip(tops, tops[1:]):
+        for dx in (-0.14, 0.14):
+            wires.add(ParametricFunction(
+                lambda u, xa=xa, xb=xb, ya=ya, dx=dx: np.array(
+                    [interpolate(xa, xb, u) + dx, ya - 0.18 * 4 * u * (1 - u), 0]),
+                t_range=[0, 1, 0.05], color=WIRE, stroke_width=1.3))
+    return VGroup(wires, poles)
+
+
+SUN_POS = np.array([5.75, 3.35, 0])
+
+
+def make_sun(center=SUN_POS, radius=0.3):
+    """
+    A cartoon sun that never stops moving: two rings of short rays turning slowly in
+    opposite directions, and a halo that breathes. Driven by its own clock (dt
+    updaters), so it keeps going through every wait and animation without any cue.
+    """
+    halo = Circle(radius=radius * 1.55, stroke_width=0, fill_color=GOLD, fill_opacity=0.18).move_to(center)
+    disc = Circle(radius=radius, stroke_width=0, fill_color=GOLD, fill_opacity=1).move_to(center)
+
+    def ring(n, r0, r1, width, opacity, phase=0.0):
+        rays = VGroup()
+        for k in range(n):
+            a = TAU * k / n + phase
+            d = np.array([np.cos(a), np.sin(a), 0])
+            rays.add(Line(center + d * r0, center + d * r1, color=GOLD, stroke_width=width,
+                          stroke_opacity=opacity).set_cap_style(CapStyleType.ROUND))
+        return rays
+
+    long_rays = ring(10, radius * 1.3, radius * 1.85, 4, 0.9)
+    short_rays = ring(10, radius * 1.3, radius * 1.6, 3, 0.6, phase=TAU / 20)
+    clock = {"t": 0.0}
+
+    def tick(m, dt):
+        clock["t"] += dt
+        long_rays.rotate(0.22 * dt, about_point=center)
+        short_rays.rotate(-0.15 * dt, about_point=center)
+        target = radius * 1.55 * (1 + 0.06 * np.sin(clock["t"] * 1.8))
+        halo.scale(target / (halo.width / 2), about_point=center)
+
+    sun = VGroup(halo, long_rays, short_rays, disc)
+    sun.add_updater(tick)
+    return sun
+
+
+def make_scenery():
+    """Sky, two mountain ranges, pine trees and power lines behind the road."""
+    top = config.frame_height / 2
+    sky = Rectangle(width=config.frame_width, height=top - ROAD_Y, fill_color=SKY, fill_opacity=1, stroke_width=0)
+    sky.move_to([0, (top + ROAD_Y) / 2, 0])
+    sky.bleed = True
+    far = mountain_range(ROAD_Y, 5, MOUNTAIN_FAR, seed=4).stretch(1.0, 1).shift(UP * 0.12)
+    near = mountain_range(ROAD_Y, 7, MOUNTAIN_NEAR, seed=9)
+    rng = np.random.default_rng(7)
+    trees = VGroup(*[pine_tree(np.array([x, ROAD_Y + 0.02, 0]), rng.uniform(0.35, 0.6))
+                     for x in (-6.6, -6.25, -4.3, -3.95, -1.8, 1.4, 1.75, 3.6, 5.6, 5.95, 6.5)])
+    lines = power_lines(ROAD_Y + 0.02, np.arange(-6.4, 6.6, 2.55))
+    return VGroup(sky, make_sun(), far, near, trees, lines).set_z_index(-5)
+
+
 def make_road():
+    """Scenery, road and distance marks."""
     road = Line([ROAD_X0 - 0.9, ROAD_Y, 0], [ROAD_X1 + 0.9, ROAD_Y, 0], color=INK, stroke_width=3)
     marks = VGroup()
     for d in range(0, int(D_TOTAL) + 1, 50):
         tick = Line(ORIGIN, DOWN * 0.12, color=INK, stroke_width=2)
         tick.move_to(road_point(d), aligned_edge=UP)
         marks.add(tick, txt(f"{d} m", SIZE_TICK, MUTED).next_to(tick, DOWN, buff=0.1))
-    return VGroup(road, marks)
+    return VGroup(make_scenery(), road, marks)
 
 
 def make_car(color=CURVE):
@@ -672,6 +779,17 @@ class DerivativeStack:
         if curves:
             anims.append(ReplacementTransform(self.curves, other.curves))
         return anims
+
+
+def acceleration(t):
+    """+10 m/s² while speeding up, -10 m/s² while braking."""
+    return 10.0 if t < 5 else -10.0
+
+
+def car_stack(**kw):
+    return DerivativeStack([s, v, acceleration], T_TOTAL,
+                           [(0, 260), (0, 55), (-12, 12)],
+                           ["distance (m)", "speed (m/s)", "acceleration (m/s²)"], **kw)
 
 
 class LessonScene(TimedScene, MovingCameraScene):

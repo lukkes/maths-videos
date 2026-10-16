@@ -88,7 +88,18 @@ class Narration:
 
     @classmethod
     def from_descript(cls, path: Path) -> "Narration":
-        text = path.read_text()
+        # Drop markdown headings (a title or chapter name with --- or === under it); they aren't spoken.
+        lines = path.read_text().splitlines()
+        keep = []
+        for i, line in enumerate(lines):
+            under = lines[i + 1].strip() if i + 1 < len(lines) else ""
+            if re.fullmatch(r"[-=]{3,}", line.strip()):
+                continue
+            if re.fullmatch(r"[-=]{3,}", under):
+                keep.append("".join(TIMECODE.findall(line) and [m.group(0) for m in TIMECODE.finditer(line)]))
+                continue
+            keep.append(line)
+        text = "\n".join(keep)
         marks = list(TIMECODE.finditer(text))
         if not marks:
             raise ValueError(f"No timecodes like 00:00:05 found in {path}")
@@ -212,7 +223,7 @@ class TimedScene:
             for m in top.get_family():
                 if not isinstance(m, VMobject) or m.get_num_points() == 0 or id(m) in seen:
                     continue
-                if max(m.get_stroke_opacity(), m.get_fill_opacity()) < 0.05:
+                if max(m.get_stroke_opacity(), m.get_fill_opacity()) < 0.05 or getattr(m, "bleed", False):
                     continue
                 (x0, y0, _), (x1, y1, _) = m.get_critical_point(DL), m.get_critical_point(UR)
                 if x0 < cx - hw or x1 > cx + hw or y0 < cy - hh or y1 > cy + hh:

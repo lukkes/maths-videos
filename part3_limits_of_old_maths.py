@@ -136,6 +136,7 @@ class Part3(LessonScene):
         zero = self.panel(fraction("0 m", "0 s", 40, WRONG, BOLD), -0.4)
         q = txt("= ?", 40, WRONG, BOLD).next_to(zero, RIGHT, buff=0.25)
         self.at("zero divided by zero", FadeOut(live_rise), FadeOut(live_run), FadeIn(zero), FadeIn(q))
+        self.play(Wiggle(VGroup(zero, q), scale_value=1.08, rotation_angle=0.04 * TAU), run_time=0.7)
         self.old_graph = VGroup(live_dots, live_line, zero, q, self.rr, self.tracker.curve,
                                 self.tracker.dot, self.start_dot, self.end_dot)
 
@@ -207,4 +208,7 @@ class Part3(LessonScene):
         self.at("calculus was invented", FadeOut(self.slider_value), FadeIn(terms[0], shift=UP * 0.1))
         self.at("differential calculus", FadeIn(terms[1], shift=UP * 0.1))
         self.at("is called a derivative", FadeIn(terms[2], shift=UP * 0.1))
+        underline = Line(terms[2][0].get_corner(DL) + DOWN * 0.08, terms[2][0].get_corner(DR) + DOWN * 0.08,
+                         color=GOLD, stroke_width=5)
+        self.play(ShowPassingFlash(underline, time_width=0.9), run_time=0.8)   # the key word, underlined once
         self.finish("called a derivative")

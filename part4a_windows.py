@@ -60,7 +60,7 @@ def part4a_ending():
     h = ValueTracker(0.001)
     secants = WindowSecants(zaxes, F, T0, h, sides=(+1,))
     expr, box = result_box()
-    expr[0].set_color(CURVE)          # as recoloured in 4.20
+    expr[0].set_color(CURVE)          # as recoloured in 4.21
     expr[2].set_color(AVG)
     table = after_table()
     for row in AFTER_ROWS:
@@ -77,8 +77,8 @@ class Part4a(LessonScene):
         self.restore_part3_ending()
         for row in (self.row_4_1, self.row_4_2, self.row_4_3, self.row_4_4, self.row_4_5, self.row_4_6,
                     self.row_4_7, self.row_4_8, self.row_4_9, self.row_4_10, self.row_4_11, self.row_4_12,
-                    self.row_4_13, self.row_4_14, self.row_4_15, self.row_4_16, self.row_4_17, self.row_4_18,
-                    self.row_4_19, self.row_4_20, self.row_4_21):
+                    self.row_4_13, self.row_4_14, self.row_4_15, self.row_4_17, self.row_4_18,
+                    self.row_4_19, self.row_4_21):
             row()
 
     def restore_part3_ending(self):
@@ -181,6 +181,7 @@ class Part4a(LessonScene):
                 TransformFromCopy(self.rise_label, frac[0]), TransformFromCopy(self.bracket_label, frac[2]),
                 Create(frac[1]), run_time=1.0)
         self.at("which is 40.5", FadeIn(rest, shift=LEFT * 0.15))
+        self.play(Circumscribe(rest[1], color=GOLD, buff=0.08), run_time=0.8)
 
     # ------------------------------------------------------------------
     # 4.6  The secant (word shown briefly)
@@ -215,14 +216,14 @@ class Part4a(LessonScene):
                                      .next_to(self.mag.box, RIGHT, buff=0.35))
         self.at("if we take a hundredth of a second", FadeOut(VGroup(trip, trip_strike)), FadeIn(self.readout))
         self.span("a hundredth of a second instead", "we get forty point o five", self.h.animate.set_value(0.01))
+        self.at("This is where the new maths begins", FadeOut(self.fraction), FadeOut(self.readout),
+                FadeOut(VGroup(self.mag.group(), self.mag_a, self.mag_b, self.mag_secant)), run_time=0.9)
 
     # ------------------------------------------------------------------
     # 4.8  Postpone the choice: call it h, open the window wide
     # ------------------------------------------------------------------
     def row_4_8(self):
-        self.row("4.8_call_it_h", "This is where the new maths begins")
-        self.at("This is where the new maths begins", FadeOut(self.fraction), FadeOut(self.readout),
-                FadeOut(VGroup(self.mag.group(), self.mag_a, self.mag_b, self.mag_secant)), run_time=0.9)
+        self.row("4.8_call_it_h", "If a small window is a good idea")
         self.span("let's not pick a window size", "at all", self.h.animate.set_value(WIDE_H), rate_func=smooth)
         word = txt("postpone", SIZE_LABEL + 4, AVG, BOLD).move_to([PANEL_X, 0.2, 0])
         self.at("postpone that decision", FadeIn(word, scale=0.9))
@@ -255,12 +256,12 @@ class Part4a(LessonScene):
     # ------------------------------------------------------------------
     def row_4_11(self):
         self.row("4.11_check_numbers", "After four seconds, the distance")
-        l1 = tex(r"s(4) = 5 \times 16 = 80", size=SIZE_TEX_SMALL)
-        l2 = tex(r"s(4.1) = 5 \times 16.81 = 84.05", size=SIZE_TEX_SMALL)
+        l1 = tex(r"s(4) = 80", size=SIZE_TEX_SMALL)
+        l2 = tex(r"s(4.1) = 84.05", size=SIZE_TEX_SMALL)
         self.checks = VGroup(l1, l2).arrange(DOWN, aligned_edge=LEFT, buff=0.25).move_to([PANEL_X, -0.3, 0])
         self.at("After four seconds", FadeIn(l1), Indicate(self.a, color=GOLD))
         self.at("after four point one seconds", self.h.animate.set_value(0.1), run_time=0.8)
-        self.at("five times sixteen point eight", FadeIn(l2), Indicate(self.secants.dots[0], color=GOLD))
+        self.at("it's eighty four point", FadeIn(l2), Indicate(self.secants.dots[0], color=GOLD))
 
     # ------------------------------------------------------------------
     # 4.12  The general fraction
@@ -290,12 +291,16 @@ class Part4a(LessonScene):
         self.f2 = self.at_panel(tex_frac(["5t^2", "+", "10t", "h", "+", "5", "h", "^2", "-", "5t^2"], ["h"]), -0.5)
         t1, b1, d1 = self.f1
         t2, b2, d2 = self.f2
-        self.at("binomial expansion", FadeOut(self.formula), FadeIn(word))
-        self.at("t squared plus two times th", FadeIn(rule))
+        self.at("binomial expansion", FadeOut(self.formula), FadeIn(word), FadeIn(rule))
         self.at("the top becomes",
                 ReplacementTransform(t1[0], VGroup(*t2[0:8])), ReplacementTransform(t1[1], t2[8]),
                 ReplacementTransform(t1[2], t2[9]), ReplacementTransform(b1, b2), ReplacementTransform(d1, d2),
                 run_time=1.2)
+        # each new term lights up as it is read out
+        self.at("plus ten times th", Indicate(VGroup(t2[2], t2[3]), color=GOLD, scale_factor=1.15), run_time=0.6)
+        self.at("plus five times h squared", Indicate(VGroup(*t2[5:8]), color=GOLD, scale_factor=1.15), run_time=0.6)
+        self.at("minus five times t squared", Indicate(VGroup(t2[8], t2[9]), color=GOLD, scale_factor=1.15),
+                run_time=0.6)
 
     # ------------------------------------------------------------------
     # 4.14  The 5t^2 terms cancel: they are where the car started
@@ -308,16 +313,15 @@ class Part4a(LessonScene):
                 last.animate.set_color(GOLD), FadeOut(self.side_note))
         link = DashedLine(first.get_left() + LEFT * 0.05, self.label_t.get_right() + RIGHT * 0.05, color=GOLD,
                           stroke_width=2)
-        self.at("That quantity represents a distance", Create(link), self.label_t.animate.set_color(GOLD),
-                run_time=1.0)
+        self.at("it makes sense", Create(link), self.label_t.animate.set_color(GOLD), run_time=0.6)
         strikes = VGroup(strike(first), strike(VGroup(minus, last)))
-        self.at("at the start of our window", Create(strikes))
+        self.play(Create(strikes), run_time=0.4)
 
         self.f3 = self.at_panel(tex_frac(["10t", "h", "+", "5", "h", "^2"], ["h"]), -0.5)
         t3, b3, d3 = self.f3
         self.play(FadeOut(VGroup(first, minus, last, strikes, top[1], link)), self.label_t.animate.set_color(CURVE),
                   ReplacementTransform(VGroup(*top[2:8]), t3), ReplacementTransform(bar, b3),
-                  ReplacementTransform(bottom, d3), run_time=0.9)
+                  ReplacementTransform(bottom, d3), run_time=0.6)
 
     # ------------------------------------------------------------------
     # 4.15  Where the car was doesn't matter, only how far it moved
@@ -336,23 +340,16 @@ class Part4a(LessonScene):
         self.at("car was when the window opened", Create(before))
 
     # ------------------------------------------------------------------
-    # 4.16  Every surviving term carries an h
-    # ------------------------------------------------------------------
-    def row_4_16(self):
-        self.row("4.16_terms_with_h", "What survives is every term")
-        top = self.f3[0]
-        self.at("every term with at least one h", top[1].animate.set_color(AVG), top[4].animate.set_color(AVG),
-                Indicate(self.bracket_label, color=AVG))
-
-    # ------------------------------------------------------------------
     # 4.17  Divide by h: allowed, because h is a real window
     # ------------------------------------------------------------------
     def row_4_17(self):
         self.row("4.17_divide_by_h", "Here we are allowed to simplify")
         top, bar, bottom = self.f3
         self.cancel = VGroup(strike(top[1]), strike(top[4]), strike(bottom))
-        self.at("simplify the fraction by h", FadeOut(self.road_marks), Create(self.cancel), run_time=1.0)
-        self.at("a real, non-zero window length", Indicate(self.bracket, color=AVG, scale_factor=1.1))
+        self.at("simplify the fraction by h", FadeOut(self.road_marks), top[1].animate.set_color(AVG),
+                top[4].animate.set_color(AVG), Indicate(self.bracket_label, color=AVG), run_time=1.0)
+        self.at("h itself is a real", Create(self.cancel), run_time=0.8)
+        self.at("non-zero window length", Indicate(self.bracket, color=AVG, scale_factor=1.1))
 
     # ------------------------------------------------------------------
     # 4.18  10t + 5h
@@ -377,23 +374,15 @@ class Part4a(LessonScene):
         self.at("we haven't chosen yet", Indicate(self.bracket_label, color=AVG, scale_factor=1.5))
 
     # ------------------------------------------------------------------
-    # 4.20  10t plus a correction 5h
-    # ------------------------------------------------------------------
-    def row_4_20(self):
-        self.row("4.20_shape", "Notice the shape of it")
-        e = self.expr
-        self.at("which doesn't involve", e[0].animate.set_color(CURVE), Indicate(e[0], color=CURVE))
-        self.at("a correction that", e[2].animate.set_color(AVG), Indicate(e[2], color=AVG),
-                Indicate(self.bracket, color=AVG, scale_factor=1.1))
-
-    # ------------------------------------------------------------------
     # 4.21  At t = 4: 40 + 5h, and a table of windows after
     # ------------------------------------------------------------------
     def row_4_21(self):
         self.row("4.21_at_four", "At four seconds, the average")
         self.sub = sub_line()
         self.table = after_table()
+        e = self.expr
         self.at("At four seconds", FadeOut(self.label_th), FadeOut(self.label_t),
+                e[0].animate.set_color(CURVE), e[2].animate.set_color(AVG),
                 TransformFromCopy(self.expr, self.sub), run_time=1.0)
         self.at("A window of a tenth of a second", self.table.header_in(), self.h.animate.set_value(0.1))
         self.play(self.table.add_row(AFTER_ROWS[0]), run_time=0.6)

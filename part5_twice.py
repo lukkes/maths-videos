@@ -1,7 +1,7 @@
 """
-Part 5: storyboard rows 5.1 to 5.9 (5.4 and 5.5 are empty in the storyboard).
-Differentiating twice, then the same stack of derivatives for an epidemic and
-for the current in a coil.
+Part 5: storyboard rows 5.1, 5.2, 5.3, 5.6, 5.7 and 5.9. Differentiating twice,
+then the same stack of derivatives for an epidemic; 5.9 also shows a third
+stack for the current in a wire.
 
 Opens on part 4b's last frame (built by part4b_ending()).
 
@@ -18,17 +18,6 @@ T_SECANT = 1.5                    # where the secant on the speed graph starts, 
 # ----------------------------------------------------------------------
 # The three stacks: car, epidemic, wire
 # ----------------------------------------------------------------------
-
-
-def acceleration(t):
-    """+10 m/s² while speeding up, -10 m/s² while braking."""
-    return 10.0 if t < 5 else -10.0
-
-
-def car_stack(**kw):
-    return DerivativeStack([s, v, acceleration], T_TOTAL,
-                           [(0, 260), (0, 55), (-12, 12)],
-                           ["distance (m)", "speed (m/s)", "acceleration (m/s²)"], **kw)
 
 
 def cases(t):
@@ -82,63 +71,6 @@ def wire_stack(**kw):
 
 
 # ----------------------------------------------------------------------
-# The coil circuit in 5.8: battery, switch, coil, and a spark gap across the coil
-# ----------------------------------------------------------------------
-class CoilCircuit:
-    LEFT_X, RIGHT_X, TOP_Y, BOTTOM_Y = 2.1, 6.5, 2.35, 0.2
-    COIL = (3.4, 5.2)          # x range of the coil on the top wire
-    GAP_Y = 1.5                # height of the spark gap branch
-
-    def __init__(self):
-        l, r, top, bot = self.LEFT_X, self.RIGHT_X, self.TOP_Y, self.BOTTOM_Y
-        c0, c1 = self.COIL
-        w = dict(color=INK, stroke_width=3)
-
-        coil = ParametricFunction(
-            lambda u: np.array([c0 + (c1 - c0) * u - 0.16 * np.sin(2 * PI * 6 * u),
-                                top + 0.1 * (1 - np.cos(2 * PI * 6 * u)), 0]),
-            t_range=[0, 1, 0.002], **w)
-        mid = (c0 + c1) / 2
-        gap_l, gap_r = mid - 0.12, mid + 0.12
-        self.gap = (np.array([gap_l, self.GAP_Y, 0]), np.array([gap_r, self.GAP_Y, 0]))
-        battery_x = 4.3
-        sw_a, sw_b = np.array([2.7, bot, 0]), np.array([3.3, bot, 0])
-        self.switch_hinge, self.switch_end = sw_a, sw_b
-
-        wires = VGroup(
-            Line([l, top, 0], [c0, top, 0], **w), Line([c1, top, 0], [r, top, 0], **w),
-            Line([r, top, 0], [r, bot, 0], **w), Line([l, bot, 0], [l, top, 0], **w),
-            Line([r, bot, 0], [battery_x + 0.12, bot, 0], **w),
-            Line([battery_x - 0.12, bot, 0], sw_b, **w), Line(sw_a, [l, bot, 0], **w),
-            # the spark-gap branch across the coil
-            Line([c0, top, 0], [c0, self.GAP_Y, 0], **w), Line([c0, self.GAP_Y, 0], self.gap[0], **w),
-            Line([c1, top, 0], [c1, self.GAP_Y, 0], **w), Line([c1, self.GAP_Y, 0], self.gap[1], **w),
-        )
-        battery = VGroup(Line([battery_x + 0.12, bot - 0.28, 0], [battery_x + 0.12, bot + 0.28, 0], **w),
-                         Line([battery_x - 0.12, bot - 0.15, 0], [battery_x - 0.12, bot + 0.15, 0],
-                              color=INK, stroke_width=6))
-        electrodes = VGroup(*[Dot(p, radius=0.05, color=INK) for p in self.gap])
-        terminals = VGroup(*[Dot(p, radius=0.05, color=INK) for p in (sw_a, sw_b)])
-        self.lever = Line(sw_a, sw_b, color=INK, stroke_width=3.5)
-        self.coil = coil
-        self.label = txt("voltage across a coil", SIZE_LABEL, AVG, BOLD).next_to([mid, top + 0.25, 0], UP, buff=0.1)
-        self.body = VGroup(wires, coil, battery, electrodes, terminals, self.lever)
-
-    def open_switch(self):
-        return Rotate(self.lever, angle=PI / 5, about_point=self.switch_hinge)
-
-    def spark(self):
-        a, b = self.gap
-        pts = [a + RIGHT * 0.03]
-        for k, frac in enumerate(np.linspace(0, 1, 6)[1:-1]):
-            pts.append(interpolate(a, b, frac) + UP * (0.09 if k % 2 == 0 else -0.09))
-        pts.append(b + LEFT * 0.03)
-        bolt = VMobject(color=GOLD, stroke_width=5).set_points_as_corners(pts).set_z_index(6)
-        glow = Circle(radius=0.3, stroke_width=0, fill_color=GOLD, fill_opacity=0.35).move_to((a + b) / 2)
-        return VGroup(glow, bolt)
-
-
-# ----------------------------------------------------------------------
 # 5.9's side-by-side frame, built here so part 6 can open on it
 # ----------------------------------------------------------------------
 THUMB_SCALE = 0.5
@@ -179,8 +111,7 @@ class Part5(LessonScene):
 
     def construct(self):
         self.restore_part4b_ending()
-        for row in (self.row_5_1, self.row_5_2, self.row_5_3, self.row_5_6, self.row_5_7, self.row_5_8,
-                    self.row_5_9):
+        for row in (self.row_5_1, self.row_5_2, self.row_5_3, self.row_5_6, self.row_5_7, self.row_5_9):
             row()
 
     def restore_part4b_ending(self):
@@ -305,14 +236,14 @@ class Part5(LessonScene):
         plate = RoundedRectangle(corner_radius=0.08, width=caption.width + 0.5, height=caption.height + 0.35,
                                  fill_color=INK, fill_opacity=1, stroke_width=0)
         strip = Rectangle(width=0.12, height=plate.height, fill_color=AVG, fill_opacity=1, stroke_width=0)
-        lower_third = VGroup(plate, caption, strip.next_to(plate, LEFT, buff=0)).move_to([PANEL_X, -2.6, 0])
-        self.at("the curve flattening", FadeIn(lower_third, shift=UP * 0.2))
+        upper_third = VGroup(plate, caption, strip.next_to(plate, LEFT, buff=0)).move_to([PANEL_X, 2.9, 0])
+        self.at("the curve flattening", FadeIn(upper_third, shift=DOWN * 0.2))
 
         rising = self.short_tangent(epi, 0, x, GOLD)
         flat = self.short_tangent(epi, 1, x, GOLD)
         self.at("still getting new cases every day", Create(rising), Indicate(marks[0], scale_factor=1.6))
         self.at("decreasing rate", Create(flat), Indicate(marks[2], scale_factor=1.6))
-        self.flatten_bits = VGroup(cursor, marks, lower_third, rising, flat, self.epi_labels)
+        self.flatten_bits = VGroup(cursor, marks, upper_third, rising, flat, self.epi_labels)
 
     def short_tangent(self, stack, k, x, color, half=0.7):
         f, ax = stack.funcs[k], stack.axes[k]
@@ -322,47 +253,17 @@ class Part5(LessonScene):
         return Line(p - d * half, p + d * half, color=color, stroke_width=4).set_z_index(4)
 
     # ------------------------------------------------------------------
-    # 5.8  The same stack for a wire and a coil
-    # ------------------------------------------------------------------
-    def row_5_8(self):
-        self.row("5.8_coil", "Or take the charge")
-        epi = self.epi
-        wire = self.wire = wire_stack()
-        circuit = CoilCircuit()
-        self.at("Or take the charge", FadeOut(self.flatten_bits), FadeOut(epi.curves),
-                *epi.morph_to(wire, curves=False), FadeIn(circuit.body), run_time=1.2)
-        u = ValueTracker(0.02)
-        growing = VGroup(*[wire.growing(k, u) for k in range(3)])
-        self.add(growing)
-        self.span("that has flowed through a wire", "the current changes", u.animate.set_value(T_OFF - 0.05),
-                  Succession(Indicate(wire.titles[0], color=CURVE, scale_factor=1.15, run_time=1), Wait(0.6),
-                             Indicate(wire.titles[1], color=AVG, scale_factor=1.15, run_time=1), Wait(2.5)),
-                  rate_func=linear)
-        spark = circuit.spark()
-        self.at("produces a voltage across a coil", circuit.open_switch(), u.animate.set_value(T_OFF + 0.6),
-                run_time=0.6, rate_func=linear)
-        self.play(FadeIn(spark, scale=0.5), FadeIn(circuit.label), run_time=0.25)
-        self.play(FadeOut(spark), u.animate.set_value(10), run_time=1.2, rate_func=linear)
-        self.remove(growing)
-        self.add(wire.curves)
-        again = circuit.spark()
-        self.at("into a spark", FadeIn(again, scale=0.5), run_time=0.25)
-        self.play(FadeOut(again), run_time=0.5)
-        self.circuit = VGroup(circuit.body, circuit.label)
-
-    # ------------------------------------------------------------------
     # 5.9  Three stacks side by side: derivative, derivative of a derivative
     # ------------------------------------------------------------------
     def row_5_9(self):
         self.row("5.9_side_by_side", "Whenever you ask")
-        wire = self.wire
-        car, epi = car_stack(), epidemic_stack()
-        thumbs = [car.group(), epi.group()]
-        for g, slot in zip(thumbs, THUMB_SLOTS):
-            g.scale(THUMB_SCALE).move_to(slot)
-        self.at("Whenever you ask", FadeOut(self.circuit),
-                wire.group().animate.scale(THUMB_SCALE).move_to(THUMB_SLOTS[2]),
-                FadeIn(thumbs[0]), FadeIn(thumbs[1]), run_time=0.7)
+        epi = self.epi
+        car, wire = car_stack(), wire_stack()     # the wire stack is shown here without being narrated
+        for st, slot in ((car, THUMB_SLOTS[0]), (wire, THUMB_SLOTS[2])):
+            st.group().scale(THUMB_SCALE).move_to(slot)
+        self.at("Whenever you ask", FadeOut(self.flatten_bits),
+                epi.group().animate.scale(THUMB_SCALE).move_to(THUMB_SLOTS[1]),
+                FadeIn(car.group()), FadeIn(wire.group()), run_time=0.8)
 
         stacks = [car, epi, wire]
         first, second, guides = side_labels(wire)
@@ -371,5 +272,5 @@ class Part5(LessonScene):
         self.at("asking for a derivative", FadeIn(first[-1], shift=UP * 0.1))
         self.at("whether that change is speeding up", FadeIn(second[:-1]), Create(guides[1]),
                 *[Indicate(st.arrows[1], color=AVG) for st in stacks])
-        self.at("the derivative of a derivative", FadeIn(second[-1], shift=UP * 0.1))
+        self.at("the derivative of a derivative", FadeIn(second[-1], shift=UP * 0.1), run_time=0.45)
         self.finish("the derivative of a derivative")
