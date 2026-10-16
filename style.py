@@ -39,9 +39,9 @@ SIZE_READING = 34   # speedometer number
 SIZE_BIG = 72       # single-glyph emphasis, like "?"
 
 
-def txt(s, size=SIZE_LABEL, color=INK, weight=NORMAL):
+def txt(s, size=SIZE_LABEL, color=INK, weight=NORMAL, slant=NORMAL):
     """Text rendered large and scaled down; Pango kerns badly at small sizes."""
-    return Text(s, font=FONT, weight=weight, color=color, font_size=96).scale(size / 96)
+    return Text(s, font=FONT, weight=weight, slant=slant, color=color, font_size=96).scale(size / 96)
 
 
 def num(s, size=SIZE_LABEL, color=INK, weight=NORMAL):
@@ -167,6 +167,20 @@ def car_on_road(t: ValueTracker, motion: Motion):
     return car
 
 
+def opening_layout(t: ValueTracker, motion: Motion):
+    """
+    Road, car and clock as part 2 opens. Part 1 ends on exactly this frame and
+    part 2 starts on it, so the cut between the two clips doesn't show.
+    """
+    return make_road(), car_on_road(t, motion), make_clock(t)
+
+
+def tick_mark(size=0.32, color=ACCENT):
+    """A drawn check mark (fonts don't all have the glyph)."""
+    return VMobject(color=color, stroke_width=6).set_points_as_corners(
+        [LEFT * 0.5 + UP * 0.05, DOWN * 0.4, RIGHT * 0.6 + UP * 0.6]).scale(size)
+
+
 def make_clock(t: ValueTracker):
     return always_redraw(
         lambda: num(f"t = {t.get_value():.1f} s", SIZE_CLOCK).move_to(CLOCK_POS, aligned_edge=DL)
@@ -243,6 +257,23 @@ class CurveTracker:
         scene.add(self.guides)
 
 
+def rise_run_triangle(axes, f, x, dx, color=AVG, width=3):
+    """Run and rise of f between x and x + dx, drawn on the axes."""
+    a, b = axes.c2p(x, f(x)), axes.c2p(x + dx, f(x))
+    c = axes.c2p(x + dx, f(x + dx))
+    return VGroup(Line(a, b, color=color, stroke_width=width), Line(b, c, color=color, stroke_width=width))
+
+
+def secant(axes, f, x1, x2, color=AVG, extend=1.5, width=3):
+    """The straight line through (x1, f(x1)) and (x2, f(x2)), drawn a little past both points."""
+    line = Line(axes.c2p(x1, f(x1)), axes.c2p(x2, f(x2)), color=color, stroke_width=width)
+    return line.scale(extend)
+
+
+def gradient(f, x1, x2):
+    return (f(x2) - f(x1)) / (x2 - x1)
+
+
 def make_speedometer(read_speed, center, radius=1.25, max_speed=60):
     """
     A dial from 0 to max_speed m/s whose needle follows read_speed(), a function
@@ -278,6 +309,371 @@ def make_speedometer(read_speed, center, radius=1.25, max_speed=60):
 # ==========================================================================
 # Base scene
 # ==========================================================================
+# ==========================================================================
+# Formulas (LaTeX). Sans-serif maths so formulas sit well next to Inter.
+# Pass formula parts as separate strings to address them later by index:
+#     f = tex("5t^2", "+", "10t", "h")      f[2] is "10t"
+# ==========================================================================
+TEX = TexTemplate()
+TEX.add_to_preamble(r"\usepackage[T1]{fontenc}\usepackage{helvet}"
+                    r"\renewcommand{\familydefault}{\sfdefault}\usepackage{sansmath}\sansmath")
+SIZE_TEX = 34       # formula size on the right panel
+SIZE_TEX_SMALL = 26
+
+
+def tex(*parts, size=SIZE_TEX, color=INK):
+    return MathTex(*parts, tex_template=TEX, color=color, font_size=size)
+
+
+def tex_frac(top_parts, bottom_parts, size=SIZE_TEX, color=INK):
+    """A fraction whose top and bottom are separate tex objects, so each part stays addressable.
+    Returns VGroup(top, bar, bottom)."""
+    top, bottom = tex(*top_parts, size=size, color=color), tex(*bottom_parts, size=size, color=color)
+    bar = Line(LEFT, RIGHT, color=color, stroke_width=2.5).stretch_to_fit_width(max(top.width, bottom.width) + 0.2)
+    return VGroup(top, bar, bottom).arrange(DOWN, buff=0.12)
+
+
+def strike(mob, color=WRONG, width=4):
+    """A diagonal line through a mobject, for cancelling terms."""
+    return Line(mob.get_corner(DL) + DL * 0.04, mob.get_corner(UR) + UR * 0.04, color=color, stroke_width=width)
+
+
+# ==========================================================================
+# Shared stage: what's on screen whenever the graph is showing.
+# Parts build their opening and closing frames from this, so the frame one
+# part ends on and the next part starts on are made by the same code.
+# ==========================================================================
+class GraphStage:
+    def __init__(self, t_value=0.0):
+        self.t = ValueTracker(t_value)
+        self.motion = Motion()
+        self.road, self.car, self.clock = opening_layout(self.t, self.motion)
+        self.axes, self.axis_labels = make_axes()
+        self.tracker = CurveTracker(self.axes, self.t)
+
+    def base(self):
+        """Road, car, clock, axes and the full curve."""
+        return [self.road, self.car, self.clock, self.axes, self.axis_labels, self.tracker.curve]
+
+
+# A close-up of the curve around t = 4, taller than the main graph and with a
+# stronger vertical scale so the curve visibly bends and secants visibly tilt.
+# It plots the formula 5t^2 itself (part 4 works with the formula).
+ZOOM_X = (0, 6.2)
+ZOOM_Y = (0, 190)
+ZOOM_ORIGIN = np.array([-6.1, -3.35, 0])
+ZOOM_SIZE = (5.0, 4.5)
+
+
+def five_t_squared(t):
+    return 5 * t * t
+
+
+def make_zoomed_axes(f=five_t_squared, color=CURVE):
+    """Close-up distance-time axes around t = 4. Returns (axes, labels, curve)."""
+    axes = Axes(
+        x_range=[ZOOM_X[0], ZOOM_X[1], 1], y_range=[ZOOM_Y[0], ZOOM_Y[1], 50],
+        x_length=ZOOM_SIZE[0], y_length=ZOOM_SIZE[1], tips=False,
+        axis_config={"color": INK, "stroke_width": 2.5, "include_numbers": False, "tick_size": 0.05},
+    )
+    axes.shift(ZOOM_ORIGIN - axes.c2p(ZOOM_X[0], ZOOM_Y[0]))
+    labels = VGroup(
+        *[txt(f"{x} s", SIZE_TICK, MUTED).next_to(axes.c2p(x, ZOOM_Y[0]), DOWN, buff=0.14) for x in (2, 4, 6)],
+        *[txt(str(y), SIZE_TICK, MUTED).next_to(axes.c2p(ZOOM_X[0], y), LEFT, buff=0.14)
+          for y in range(50, 151, 50)],
+        txt("distance (m)", SIZE_TICK, MUTED).next_to(axes.c2p(ZOOM_X[0], ZOOM_Y[1]), UP, buff=0.14)
+        .align_to(axes.c2p(ZOOM_X[0], ZOOM_Y[0]), LEFT),
+    )
+    curve = axes.plot(f, x_range=list(ZOOM_X), color=color, stroke_width=5).set_z_index(2)
+    return axes, labels, curve
+
+
+def clipped_line_points(axes, x0, y0, slope, half_width):
+    """Endpoints (in data coordinates) of a line through (x0, y0), clipped to the axes ranges."""
+    (xa, xb), (ya, yb) = axes.x_range[:2], axes.y_range[:2]
+    pts = []
+    for x in (x0 - half_width, x0 + half_width):
+        x = float(np.clip(x, xa, xb))
+        y = y0 + slope * (x - x0)
+        if y < ya or y > yb:
+            y = float(np.clip(y, ya, yb))
+            x = x0 + (y - y0) / slope if slope else x
+        pts.append((x, y))
+    return pts
+
+
+class Magnifier:
+    """
+    A boxed close-up of a small region of a graph, shown elsewhere on screen,
+    with a lens circle on the graph and two lines linking lens and box.
+
+        mag = Magnifier(axes, f, x_range=(3.95, 4.2), y_range=(78, 86), center=[3.2, -0.4, 0])
+        scene.play(mag.show())
+        dot = mag.live_dot(lambda: 4 + h.get_value(), AVG)
+    """
+
+    def __init__(self, axes, f, x_range, y_range, center, size=2.6, color=CURVE):
+        self.main, self.f = axes, f
+        self.inner = Axes(x_range=[*x_range, (x_range[1] - x_range[0]) / 5], y_range=[*y_range, 1],
+                          x_length=size, y_length=size, tips=False,
+                          axis_config={"stroke_opacity": 0, "include_ticks": False}).move_to(center)
+        self.box = Square(side_length=size + 0.1, color=MUTED, stroke_width=2).move_to(center)
+        self.curve = self.inner.plot(f, x_range=list(x_range), color=color, stroke_width=5)
+        mid = ((x_range[0] + x_range[1]) / 2, (y_range[0] + y_range[1]) / 2)
+        self.lens = Circle(radius=0.22, color=MUTED, stroke_width=2).move_to(axes.c2p(*mid))
+        self.links = VGroup(Line(self.lens.get_top(), self.box.get_corner(UL), color=MUTED, stroke_width=1.2),
+                            Line(self.lens.get_bottom(), self.box.get_corner(DL), color=MUTED, stroke_width=1.2))
+        self.links.set_stroke(opacity=0.6)
+
+    def group(self):
+        return VGroup(self.lens, self.links, self.box, self.curve)
+
+    def show(self):
+        return AnimationGroup(Create(self.lens), Create(self.links), FadeIn(self.box), Create(self.curve))
+
+    def point(self, x):
+        return self.inner.c2p(x, self.f(x))
+
+    def live_dot(self, x_func, color, radius=0.09):
+        return always_redraw(lambda: Dot(self.point(x_func()), radius=radius, color=color).set_z_index(6))
+
+
+class WindowSecants:
+    """
+    Secants from a fixed point x0 to x0 + h ("after", side +1) and/or x0 - h
+    ("before", side -1), with their outer dots, all driven by one ValueTracker h.
+    Lines and dots are separate groups so dots can appear before lines.
+
+        w = WindowSecants(axes, s, 4.0, h, sides=(+1,))
+        scene.add(w.dots)                 # live dots
+        scene.play(Create(w.lines))       # live secant lines
+        scene.play(h.animate.set_value(0.01))
+        still = w.freeze(scene)           # swap the live drawing for a still copy
+    """
+
+    COLORS = {+1: AVG, -1: GOLD}
+
+    def __init__(self, axes, f, x0, h: ValueTracker, sides=(+1,), extend=2.0, colors=None):
+        self.axes, self.f, self.x0, self.h, self.extend = axes, f, x0, h, extend
+        self.COLORS = {**self.COLORS, **(colors or {})}
+        self.sides = []
+        self.lines, self.dots = VGroup(), VGroup()
+        for side in sides:
+            self.add_side(side)
+
+    def point(self, side):
+        x = self.x0 + side * max(self.h.get_value(), 0.0)
+        return self.axes.c2p(x, self.f(x))
+
+    def _line(self, side):
+        def draw():
+            h = max(self.h.get_value(), 1e-6)
+            slope = gradient(self.f, self.x0, self.x0 + side * h)
+            (xa, ya), (xb, yb) = clipped_line_points(self.axes, self.x0, self.f(self.x0), slope, self.extend)
+            line = DashedLine(self.axes.c2p(xa, ya), self.axes.c2p(xb, yb), color=self.COLORS[side],
+                              stroke_width=3.5, dash_length=0.07, dashed_ratio=0.55)
+            return line.set_z_index(4)
+        return always_redraw(draw)
+
+    def _dot(self, side):
+        return always_redraw(lambda: Dot(self.point(side), radius=0.08, color=self.COLORS[side]).set_z_index(5))
+
+    def add_side(self, side):
+        """Add a side; returns (line, dot) so they can be animated in."""
+        self.sides.append(side)
+        line, dot = self._line(side), self._dot(side)
+        self.lines.add(line)
+        self.dots.add(dot)
+        return line, dot
+
+    def value(self, side):
+        h = self.h.get_value()
+        return gradient(self.f, self.x0, self.x0 + side * h) if h > 0 else float("nan")
+
+    def freeze(self, scene):
+        still = VGroup(*[m.copy().clear_updaters() for m in [*self.lines, *self.dots]])
+        scene.remove(self.lines, self.dots)
+        scene.add(still)
+        return still
+
+
+def window_bracket(axes, x0, x1, color=AVG, lift=0.16):
+    """A flat bracket just above the time axis from x0 to x1."""
+    y = axes.c2p(x0, axes.y_range[0])[1] + lift
+    a, b = np.array([axes.c2p(x0, 0)[0], y, 0]), np.array([axes.c2p(x1, 0)[0], y, 0])
+    return VGroup(Line(a, b, color=color, stroke_width=3),
+                  Line(a + DOWN * 0.07, a + UP * 0.07, color=color, stroke_width=3),
+                  Line(b + DOWN * 0.07, b + UP * 0.07, color=color, stroke_width=3))
+
+
+class ValueTable:
+    """
+    A small table that grows a row at a time. Columns are given as headers;
+    rows are lists of strings in the same order.
+
+        table = ValueTable(["h", "window after"], col_colors=[INK, AVG])
+        scene.play(table.header_in())
+        scene.play(table.add_row(["0.1", "40.5"]))
+    """
+
+    def __init__(self, headers, col_colors=None, size=SIZE_LABEL, col_width=1.7, row_height=0.42,
+                 top_left=np.array([1.4, -0.6, 0])):
+        self.headers = list(headers)
+        self.colors = col_colors or [INK] * len(headers)
+        self.size, self.col_width, self.row_height = size, col_width, row_height
+        self.top_left = np.array(top_left, dtype=float)
+        self.rows = []
+        self.extra = VGroup()      # cells added by add_column
+        self.header = VGroup(*[
+            txt(hd, size - 2, MUTED, MEDIUM).move_to(self.cell(0, i)) for i, hd in enumerate(self.headers)])
+        self.rule = Line(self.top_left + DOWN * 0.24, self.top_left + DOWN * 0.24 + RIGHT * col_width * len(headers),
+                         color=MUTED, stroke_width=1.5)
+
+    def cell(self, row, col):
+        return self.top_left + RIGHT * (self.col_width * (col + 0.5)) + DOWN * (self.row_height * row)
+
+    def header_in(self):
+        return AnimationGroup(FadeIn(self.header), Create(self.rule))
+
+    def make_row(self, values):
+        r = len(self.rows) + 1
+        return VGroup(*[num(v, self.size, self.colors[i]).move_to(self.cell(r, i)) for i, v in enumerate(values)])
+
+    def add_row(self, values):
+        row = self.make_row(values)
+        self.rows.append(row)
+        return LaggedStart(*[FadeIn(c, shift=DOWN * 0.08) for c in row], lag_ratio=0.25)
+
+    def add_column(self, header, values, color):
+        """Add a column on the LEFT of the existing ones, growing the table leftwards; returns the animation."""
+        self.top_left = self.top_left + LEFT * self.col_width
+        self.rule.generate_target()
+        self.rule.target.put_start_and_end_on(self.rule.get_start() + LEFT * self.col_width, self.rule.get_end())
+        new_header = txt(header, self.size - 2, MUTED, MEDIUM).move_to(self.cell(0, 0))
+        new_cells = [num(v, self.size, color).move_to(self.cell(i + 1, 0)) for i, v in enumerate(values)]
+        self.colors.insert(0, color)
+        self.extra.add(new_header, *new_cells)
+        return AnimationGroup(MoveToTarget(self.rule), FadeIn(new_header),
+                              LaggedStart(*[FadeIn(c) for c in new_cells], lag_ratio=0.3))
+
+    def all(self):
+        return VGroup(self.header, self.rule, *self.rows, self.extra)
+
+
+class TrapLine:
+    """
+    A number line showing an interval [low, high] shaded, closing in on a value.
+
+        trap = TrapLine(39.4, 40.6, center=[4.2, -2.9, 0])
+        scene.play(trap.show(39.5, 40.5))
+        scene.play(trap.squeeze(39.95, 40.05))
+    """
+
+    def __init__(self, x_min, x_max, center, length=5.0, ticks=None, decimals=1):
+        self.line = NumberLine(x_range=[x_min, x_max, (x_max - x_min) / 4], length=length,
+                               color=INK, stroke_width=2, include_numbers=False, tick_size=0.06).move_to(center)
+        ticks = ticks if ticks is not None else [x_min + (x_max - x_min) * k / 4 for k in range(5)]
+        self.labels = VGroup(*[num(f"{v:.{decimals}f}", SIZE_TICK - 4, MUTED).next_to(self.line.n2p(v), DOWN, buff=0.12)
+                               for v in ticks])
+        self.low, self.high = ValueTracker(x_min), ValueTracker(x_max)
+        self.band = always_redraw(self._band)
+
+    def _band(self):
+        lo, hi = self.line.x_range[0], self.line.x_range[1]
+        a = self.line.n2p(np.clip(self.low.get_value(), lo, hi))
+        b = self.line.n2p(np.clip(self.high.get_value(), lo, hi))
+        width = max(abs(b[0] - a[0]), 0.004)
+        rect = Rectangle(width=width, height=0.26, fill_color=GOLD, fill_opacity=0.45, stroke_width=0)
+        rect.move_to((a + b) / 2)
+        ends = VGroup(Line(a + UP * 0.17, a + DOWN * 0.17, color=GOLD, stroke_width=3),
+                      Line(b + UP * 0.17, b + DOWN * 0.17, color=AVG, stroke_width=3))
+        return VGroup(rect, ends)
+
+    def group(self):
+        return VGroup(self.line, self.labels, self.band)
+
+    def set(self, low, high):
+        self.low.set_value(low)
+        self.high.set_value(high)
+
+    def squeeze(self, low, high):
+        return AnimationGroup(self.low.animate.set_value(low), self.high.animate.set_value(high))
+
+    def marker(self, value, color, label):
+        p = self.line.n2p(value)
+        tri = Triangle(color=color, fill_color=color, fill_opacity=1, stroke_width=0).scale(0.08).rotate(PI)
+        tri.move_to(p + UP * 0.3)
+        lab = num(label, SIZE_TICK - 2, color, MEDIUM).next_to(tri, UP, buff=0.06)
+        return VGroup(tri, lab)
+
+
+class DerivativeStack:
+    """
+    Three graphs stacked vertically, each the derivative of the one above, with
+    arrows between them on the right. Used for the car, the epidemic and the wire
+    in part 5, so one stack can morph into another with morph_to().
+
+        car = DerivativeStack([s, v, a], 5, [(0, 125), (0, 50), (0, 12)], ["distance (m)", ...])
+        scene.play(Create(car.axes), FadeIn(car.titles))
+        scene.play(*car.morph_to(epidemic))
+    """
+
+    CENTER = np.array([-3.4, -0.15, 0])
+    SIZE = (5.0, 1.55)
+    GAP = 1.0
+    COLORS = (CURVE, AVG, ACCENT)
+
+    def __init__(self, funcs, x_max, y_ranges, titles, center=None, x_title="time"):
+        center = self.CENTER if center is None else np.array(center, dtype=float)
+        w, h = self.SIZE
+        self.funcs, self.x_max = list(funcs), x_max
+        self.axes, self.titles, self.curves = VGroup(), VGroup(), VGroup()
+        for k, ((lo, hi), title) in enumerate(zip(y_ranges, titles)):
+            ax = Axes(x_range=[0, x_max, x_max / 5], y_range=[lo, hi, (hi - lo) / 4], x_length=w, y_length=h,
+                      tips=False, axis_config={"color": INK, "stroke_width": 2, "include_ticks": False})
+            ax.move_to(center + UP * (1 - k) * (h + self.GAP))
+            self.axes.add(ax)
+            self.titles.add(txt(title, SIZE_TICK, MUTED).next_to(ax, UP, buff=0.1).align_to(ax, LEFT))
+            self.curves.add(self.plot(k))
+        self.arrows = VGroup(*[
+            Arrow([self.axes[k].get_right()[0] + 0.4, self.axes[k].get_center()[1], 0],
+                  [self.axes[k].get_right()[0] + 0.4, self.axes[k + 1].get_center()[1], 0],
+                  buff=0.3, color=MUTED, stroke_width=3, max_tip_length_to_length_ratio=0.12)
+            for k in range(2)])
+        self.x_title = txt(x_title, SIZE_TICK, MUTED).next_to(self.axes[2], DOWN, buff=0.1).align_to(self.axes[2], RIGHT)
+
+    def plot(self, k, x_end=None):
+        x_end = self.x_max if x_end is None else max(x_end, 0.02)
+        f = self.funcs[k]
+        return self.axes[k].plot(f, x_range=[0, x_end, self.x_max / 400], color=self.COLORS[k],
+                                 stroke_width=4, use_smoothing=False).set_z_index(2)
+
+    def growing(self, k, u: ValueTracker):
+        """Curve k drawn from 0 up to the time in u, redrawn every frame."""
+        return always_redraw(lambda: self.plot(k, u.get_value()))
+
+    def point(self, k, x):
+        return self.axes[k].c2p(x, self.funcs[k](x))
+
+    def dots(self, u: ValueTracker, ks=(0, 1, 2)):
+        return VGroup(*[always_redraw(lambda k=k: Dot(self.point(k, u.get_value()), radius=0.07,
+                                                      color=self.COLORS[k]).set_z_index(5)) for k in ks])
+
+    def frame(self):
+        """Axes, titles, arrows and the time label: everything except the curves."""
+        return VGroup(self.axes, self.titles, self.arrows, self.x_title)
+
+    def group(self):
+        return VGroup(self.frame(), self.curves)
+
+    def morph_to(self, other, curves=True):
+        anims = [ReplacementTransform(self.axes, other.axes), ReplacementTransform(self.titles, other.titles),
+                 ReplacementTransform(self.arrows, other.arrows), ReplacementTransform(self.x_title, other.x_title)]
+        if curves:
+            anims.append(ReplacementTransform(self.curves, other.curves))
+        return anims
+
+
 class LessonScene(TimedScene, MovingCameraScene):
     """Cream background, plus the narration timing from timeline.py."""
 
