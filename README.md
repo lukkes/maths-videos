@@ -1,6 +1,19 @@
-# Why your speedometer needs calculus
+# Animating maths videos with Claude and Manim
+## Process
 
-Manim source for the Mathspace sample video. Scene numbers match the storyboard rows.
+Provided a working setup of Descript, Manim and Claude (on Desktop):
+- Create/generate the script for the video and polish
+- Create/generate the storyboard for the video, giving each paragraph a description of what the animated visuals should do
+- Record yourself narrating the script/use text-to-speech in a tool like Descript
+- Export the transcript of your recording and hand that to Claude, asking it to write the Manim code that animates your storyboard and syncs the scene to the transcript
+- Put everything together in Descript, polish as necessary, add captions
+- Distribute
+
+The output of the process is:
+- The individual videos files
+- The Manim source code including a shared style file that can be reused across videos.
+- The git repo which can grow with every video
+- Other MD files to act as instructions for the LLMs
 
 ## Files
 
