@@ -1,0 +1,13 @@
+Since the derivative is itself a function, does that mean we can also say something about its rate of change?
+
+Turns out we can! Running the same procedure on 10t, the average change over a window of length h is 10(t + h) minus 10t, over h, which is just 10.
+
+So the speed goes up by 10 metres per second, every second, and what came out of differentiating twice is the car's acceleration.
+
+But differentiation produces meaningful functions and numbers in many domains. Take the total number of cases in an epidemic: its derivative is new cases per day, and the derivative of that tells you whether the outbreak is speeding up or slowing down.
+
+When we were hearing news about the curve flattening in 2020, what they meant was that we were still getting new cases every day, just at a decreasing rate compared to the day before.
+
+Or take the charge that has flowed through a wire: its derivative is the current, and the rate at which the current changes is what produces a voltage across a coil, which is how the ignition coil in a petrol engine turns a small current into a spark.
+
+Whenever you ask how fast something is changing, you're asking for a derivative; whenever you ask whether that change is speeding up or slowing down, you're asking for the derivative of a derivative.

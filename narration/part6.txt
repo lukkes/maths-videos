@@ -1,0 +1,7 @@
+And that's it for this video!
+
+In the next video, we'll go back to the shortcut we saw earlier, bringing the power down and knocking one off, and prove that it works for any power of t, not just t squared. Once we have that, you won't need to take a limit every time you want a derivative.
+
+Then we'll put derivatives to work. They're how a business finds the price that brings in the most profit, how you'd design a drink can that holds the same amount using the least metal, and how doctors work out how quickly a medicine is leaving your bloodstream, so they know when the next dose is due.
+
+And then there's the reverse question: if you only know the speed at every moment, can you work out how far you've gone? That's the other half of calculus, called integration, and it's a story for another video.

@@ -1,0 +1,41 @@
+Going back to the car speedometer for a second now: can we draw some inspiration from the real-life engineering of this?
+
+After all, most speedometers conceptually work the same: they receive data from sensors which measure how many times the wheels turn in a short window of time.
+
+So with our t equals four seconds point set, let's take a very small interval, say a tenth of a second later.
+
+Suppose the car has travelled 80 metres by the first point and 84.05 metres by the second.
+
+Rise over run gives us 4.05 metres divided by 0.1 seconds, which is 40.5 metres per second.
+
+The straight line through these two points is called a secant - a word you may have met in circle geometry - and its gradient is the average speed of the car in this small window of time. Just like the speedometer's.
+
+This is a much better answer than the average speed of 25 m/s. But it's still an average, and it still depends on the window we chose: if we take a hundredth of a second instead, we get 40.05 metres per second.
+
+This is where the new maths begins. If a small window is a good idea, and a smaller window is an even better idea, then let's not pick a window size at all. Let's postpone that decision as much as possible, and call the length of that window h, and let's see what happens when h gets smaller and smaller.
+
+A lot of maths is just this: being stubborn and using a letter instead of a value for as long as possible.
+
+Let's say that while the car is speeding up, its distance after t seconds is given by the function s(t) = 5t squared metres. This is just an example to help us work with more concrete quantities, but keep in mind that this function could be anything.
+
+After 4 seconds, the distance is five times 16, which is 80 metres, and after 4.1 seconds it's five times 16.81, which is 84.05 metres.
+
+The average speed over a window of length h starting at time t is rise over run: the distance at the end of the window, which is 5(t+h) squared, minus the distance at the start which is 5t squared, all divided by h, the length of the interval.
+
+With a little bit of binomial expansion - (t + h) squared is t squared plus 2th plus h squared - the top becomes 5t squared plus 10th plus 5h squared, minus 5t squared.
+
+The 5t squared cancels out, and if we think a little bit about it, it makes sense that it does. That quantity represents a distance, namely where the car was at the start of our window.
+
+The average speed over a window shouldn't depend on where the car was when the window opened.
+
+What survives is every term with at least one h in it, which makes sense too: covering any distance takes some time, so every bit of movement inside the window carries an h with it.
+
+Here we are allowed to simplify the fraction by h because: remember that h itself is a real, non-zero window length.
+
+What remains after that cancellation is 10t + 5h.
+
+What is this, really? What we arrived at is a function that tells us the average speed of the car over a window that starts at time t and lasts h seconds, where h is just a length we haven't chosen yet.
+
+Notice the shape of it: 10t, which doesn't involve the window at all, plus 5h, a correction that is only there because the window has some length and the car speeds up a little during it.
+
+At four seconds, the average over the window is 40 + 5h. A window of a tenth of a second gives 40.5 m/s. A hundredth of a second gives 40.05, a thousandth gives 40.005 m/s, and so on.

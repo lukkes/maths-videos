@@ -1,0 +1,13 @@
+What's the speed of the car at time t equals 4 seconds? Speed is change in distance over change in time - rise over run.
+
+But how can we choose two points on this graph to measure that change? If I choose these two points, I get one gradient, and if I choose these two points I get another gradient.
+
+Even worse, if I choose a single point, my formula isn't useful anymore because rise over run becomes zero divided by zero.
+
+And it's worth noticing what went wrong here, because it's where "new maths" earns its spot in our textbooks. If we study this other car now, but zoom in only on this part of its movement, we have an object moving at a constant speed.
+
+Rise over run becomes a trivial problem because I can choose any two points and I get the same answer for what the speed was. The maths we know is perfectly capable of describing the rate of change in this case.
+
+The trouble starts when the rate of change itself keeps changing, because then the answer depends on which two points we pick.
+
+This is precisely the problem that calculus was invented to solve. The branch we'll be working with is called differential calculus and what we're trying to compute - the rate of change at a single moment - is called a derivative.

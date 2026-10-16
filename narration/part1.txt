@@ -1,0 +1,1 @@
+In this video, let's introduce calculus - and more specifically, differentiation - in such a way that makes it obvious why we even came up with all of this. After all, calculus is the mathematics of change and there has to be a good reason why the maths we've already learned so far isn't enough to study "change".

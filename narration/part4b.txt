@@ -1,0 +1,23 @@
+Now, the curious among us might also check intervals before our t equals four seconds point, just to see what happens. Run the same calculation for a window of length h ending at four seconds and you get 40 − 5h. A tenth of a second before gives 39.5 m/s, a hundredth gives 39.95, a thousandth gives 39.995.
+
+The averages from before are all below 40, the ones from after are all above it, and since the car is speeding up the whole time, its speed at the instant must sit between the average just before and the average just after. In other words, the speed at exactly four seconds is trapped between the two columns, and every row of the table traps it tighter.
+
+There is exactly one number that stays between the two columns on every row, however far down you go, and that number is 40. Try any other number, say 40.001, and we can find a window small enough, say a ten-thousandth of a second, for which the average speed is 40.0005, no longer trapping our guess.
+
+So finally we have arrived at the definition we were missing: the speed at an instant is the number the averages close in on, from both sides, as the window becomes very small. For our car at four seconds, that number is 40 m/s.
+
+Mathematicians have a name for this kind of number - the number a quantity closes in on as something else shrinks to zero. It's called a limit, and it's written like this: "lim", with "h → 0" underneath, in front of the expression. We read it as "the limit, as h approaches zero, of 40 + 5h", and it means the one number that 40 + 5h gets as close as we like to, from either side, as h shrinks, without h ever being zero.
+
+And if we don't plug in four seconds but keep t, the same reasoning turns 10t + 5h into 10t.
+
+Observe the same thing graphically now, and as h gets smaller and smaller, our two secants get closer and closer until they settle on one particular line. That line is the tangent to the curve at four seconds, and it's trapped between the two secants exactly the way the number 40 was trapped between the two columns.
+
+As we might expect, the gradient of the tangent is the speed at that instant.
+
+But now let's step back and look at what we actually achieved. We wrote rise over run for a window of length h, we refused to choose h, we did the algebra, and then we asked where the answer heads as h shrinks to zero from both sides. Written out in general, for any function s(t), the whole procedure is this:
+
+This is a derivative, and the act of taking the limit of rise over run is called differentiating the function. We read s dash of t as "the derivative of s".
+
+One more seemingly minor thing to notice but worth pointing out: the derivative of 5 times t squared is itself also a function of t, namely 10 times t. It lets us find the speed at every moment of the trip - 10 metres per second after one second, 20 after two, 50 after five.
+
+And if you've seen a textbook rule for derivatives, you've already met this result. The rule says: bring the power down in front, and knock one off the power. 5t squared becomes 2 times 5 times t, which is 10t, exactly what the limit gave us.
