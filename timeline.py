@@ -29,7 +29,7 @@ import re
 from dataclasses import dataclass
 from pathlib import Path
 
-from manim import config, logger
+from manim import config, logger, VMobject, DL, UR
 
 HERE = Path(__file__).parent
 
@@ -129,6 +129,8 @@ class Narration:
         for begin in (self._cursor, 0):
             for i in range(begin, len(texts) - n + 1):
                 if texts[i:i + n] == target:
+                    if begin == 0 and self._cursor > 0:
+                        logger.warning(f'Cue "{phrase}" found only before the previous cue; check the order.')
                     self._cursor = i
                     return i, i + n - 1
         raise KeyError(
@@ -161,14 +163,21 @@ class TimedScene:
 
     SCRIPT: str = ""
     TRANSCRIPT: str | None = "narration/transcript.txt"
+    # Where this part's clip starts and where the next part's clip starts. Either the first
+    # words of the part (the clip starts LEAD_IN before them), or (phrase, seconds): that many
+    # seconds after the phrase ends, for parts that hand over without a pause in the speech.
+    START = None        # default: the first words of SCRIPT
+    NEXT_START = None   # this clip ends where the next one begins; None for the last part
     LEAD_IN = 0.6          # seconds of picture before the first word
     DEFAULT_RUN = 0.8      # run time for at() when none is given
 
     def setup_timeline(self):
         self.narration = load_narration(self.SCRIPT, self.TRANSCRIPT)
         first_words = " ".join(tokens(Path(HERE / self.SCRIPT).read_text())[:6])
-        self._offset = self.narration.start_of(first_words) - self.LEAD_IN
+        # Clips placed back to back from 0:00 line up with the whole recording.
+        self._offset = self.anchor(self.START or first_words)
         self._late = []
+        self._offscreen = []
         logger.info(f"Timing from {self.narration.source}; scene starts at {self._offset:.2f} s")
 
     # ---- time ---------------------------------------------------------------
@@ -191,9 +200,42 @@ class TimedScene:
         elif gap < -0.1:
             self._late.append((cue, -gap))
 
+    # ---- off-screen check ----------------------------------------------------------
+    def check_bounds(self, where: str):
+        """Warn about anything visible that sticks out of the frame (text that clips, lines that overrun)."""
+        frame = getattr(self.camera, "frame", None)
+        cx, cy = (frame.get_center()[:2] if frame is not None else (0, 0))
+        hw = (frame.width if frame is not None else config.frame_width) / 2 - 0.05
+        hh = (frame.height if frame is not None else config.frame_height) / 2 - 0.05
+        seen = set()
+        for top in self.mobjects:
+            for m in top.get_family():
+                if not isinstance(m, VMobject) or m.get_num_points() == 0 or id(m) in seen:
+                    continue
+                if max(m.get_stroke_opacity(), m.get_fill_opacity()) < 0.05:
+                    continue
+                (x0, y0, _), (x1, y1, _) = m.get_critical_point(DL), m.get_critical_point(UR)
+                if x0 < cx - hw or x1 > cx + hw or y0 < cy - hh or y1 > cy + hh:
+                    seen.add(id(m))
+                    name = getattr(m, "text", None) or getattr(m, "tex_string", None) or type(m).__name__
+                    owner = getattr(top, "text", None) or getattr(top, "tex_string", None) or type(top).__name__
+                    self._offscreen.append((where, str(name)[:40], str(owner)[:40]))
+
     # ---- the three things scenes use -------------------------------------------
     def row(self, name: str, first_words: str):
-        """Start a storyboard row (a section, one clip with --save_sections) on its first words."""
+        """Start a storyboard row (a section, one clip with --save_sections) on its first words.
+
+        The first row of a scene starts at frame 0, so its clip includes the lead-in
+        instead of leaving it in a separate 'autocreated' clip.
+        """
+        if hasattr(self, "_current_row"):
+            self.check_bounds(f"end of {self._current_row}")
+        self._current_row = name
+        if not getattr(self, "_first_row_done", False):
+            self._first_row_done = True
+            self.next_section(name)
+            self.wait_until(first_words)
+            return
         self.wait_until(first_words)
         self.next_section(name)
 
@@ -211,8 +253,33 @@ class TimedScene:
             run_time = 0.3
         self.play(*animations, run_time=run_time, **kwargs)
 
+    def anchor(self, spec) -> float:
+        """Recording time where a clip starts, from a START / NEXT_START spec."""
+        if isinstance(spec, tuple):
+            phrase, delta = spec
+            return self.narration.end_of(phrase) + delta
+        return max(0.0, self.narration.start_of(spec) - self.LEAD_IN)
+
+    def clip_end(self) -> float | None:
+        """Scene time where the next part's clip starts, or None for the last part."""
+        if not self.NEXT_START:
+            return None
+        return self.anchor(self.NEXT_START) - self._offset
+
     def finish(self, last_words: str, tail: float = 1.5):
-        """Hold until the last words are over, plus a tail."""
-        self.wait_until(self.when(last_words, end=True) + tail)
+        """Hold until the next part's clip starts (or, for the last part, the last words plus a tail)."""
+        end = self.clip_end()
+        if end is None:
+            self.wait_until(self.when(last_words, end=True) + tail)
+        else:
+            if self.now > end + 0.05:
+                logger.warning(f"This part runs {self.now - end:.2f} s past the start of the next part.")
+            self.wait_until(end)
+        self.check_bounds(f"end of {getattr(self, '_current_row', 'scene')}")
+        reported = set()
+        for where, name, owner in self._offscreen:
+            if (name, owner) not in reported:
+                reported.add((name, owner))
+                logger.warning(f"OFFSCREEN at {where}: {name} (in {owner})")
         for cue, by in self._late:
             logger.warning(f'Animation for "{cue}" started {by:.2f} s late; the previous step runs long.')
