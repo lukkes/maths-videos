@@ -1,0 +1,139 @@
+Mathspace-demo
+===
+
+[00:00:00] 
+
+
+[00:00:00] Intro
+---
+
+In this [00:00:01] video, let's introduce [00:00:02] calculus, [00:00:03] and more specifically [00:00:04] differentiation, [00:00:05] in [00:00:06] such a way that makes it [00:00:07] obvious why [00:00:08] mathematicians even [00:00:09] came up with all of [00:00:10] this. [00:00:11] After all, [00:00:12] calculus is the mathematics [00:00:13] of change, [00:00:14] and there has [00:00:15] to be a good [00:00:16] reason why the [00:00:17] maths we've learned so [00:00:18] far isn't [00:00:19] enough to study [00:00:20] change
+
+
+[00:00:20] The maths we know
+---
+
+[00:00:21] And let's look at this very [00:00:22] straightforward [00:00:23] example of a car [00:00:24] starting from [00:00:25] rest, [00:00:26] driving two hundred and [00:00:27] fifty meters [00:00:28] in ten [00:00:29] seconds, and then [00:00:30] stopping at [00:00:31] the end. [00:00:32] Studying [00:00:33] cars, or more [00:00:34] generally, the [00:00:35] speed of objects, [00:00:36] would [00:00:37] undoubtedly be a very good [00:00:38] reason to invent [00:00:39] new mathematics. [00:00:40] So [00:00:41] what can we say about [00:00:42] this moving car [00:00:43] with the maths [00:00:44] we already know?
+
+[00:00:45] Well, [00:00:46] we can say that it took [00:00:47] ten seconds [00:00:48] to cover two hundred and [00:00:49] fifty meters. [00:00:50] We know that the [00:00:51] car started at [00:00:52] rest and [00:00:53] braked to a [00:00:54] stop at the end, [00:00:55] and that the [00:00:56] distance time [00:00:57] graph [00:00:58] couldn't possibly [00:00:59] be a straight [00:01:00] line because that [00:01:01] means the car had a [00:01:02] constant speed [00:01:03] for the entire [00:01:04] duration, which would [00:01:05] imply infinite [00:01:06] acceleration, which we [00:01:07] know is not [00:01:08] possible.
+
+So a [00:01:09] more realistic [00:01:10] curve would be one that [00:01:11] starts out [00:01:12] flat where [00:01:13] the car is still, [00:01:14] gets [00:01:15] steeper as [00:01:16] the car speeds [00:01:17] up, and [00:01:18] flattens out again [00:01:19] at the end as [00:01:20] it brakes. The [00:01:21] steeper the [00:01:22] graph, the faster the [00:01:23] car. And [00:01:24] another thing we can say [00:01:25] is that the [00:01:26] average speed of [00:01:27] this car was [00:01:28] two hundred and fifty [00:01:29] meters divided by [00:01:30] ten seconds, [00:01:31] meaning [00:01:32] twenty-five meters per [00:01:33] second.
+
+This is [00:01:34] also [00:01:35] exactly the gradient [00:01:36] of the straight [00:01:37] line from the start of [00:01:38] the trip to the [00:01:39] end [00:01:40] when we compute it by the [00:01:41] formula we already [00:01:42] know which is [00:01:43] rise over [00:01:44] run. That's [00:01:45] no coincidence. [00:01:46] Rise is [00:01:47] distance, run is [00:01:48] time, and distance [00:01:49] over time [00:01:50] equals speed.
+
+
+[00:01:50] The speedometer question
+---
+
+[00:01:51] But let's play this [00:01:52] again. Now, [00:01:53] looking at the speedometer [00:01:54] inside the car, [00:01:55] how does this [00:01:56] speedometer [00:01:57] compute the [00:01:58] speed at every instant?[00:01:59] 
+
+Can the [00:02:00] maths we already [00:02:01] know help [00:02:02] us with this? [00:02:03] What's the speed of the car [00:02:04] at time T [00:02:05] equals four [00:02:06] seconds? [00:02:07] Speed is [00:02:08] change in [00:02:09] distance over [00:02:10] change in time [00:02:11] or rise [00:02:12] over run. [00:02:13] But how can we [00:02:14] choose two [00:02:15] points on this graph [00:02:16] to measure that change? [00:02:17] If I choose [00:02:18] these two points [00:02:19] here, I [00:02:20] get one gradient, [00:02:21] and if I choose [00:02:22] these two points, [00:02:23] I get another [00:02:24] gradient.[00:02:25] 
+
+Even worse, [00:02:26] if I choose a [00:02:27] single point, my [00:02:28] formula isn't useful [00:02:29] anymore [00:02:30] because rise [00:02:31] over run [00:02:32] becomes zero [00:02:33] divided by zero
+
+
+[00:02:33] Measuring constant rate of change is easy
+---
+
+[00:02:34] And it's worth [00:02:35] noticing what went [00:02:36] wrong here [00:02:37] because it's where new [00:02:38] maths earns [00:02:39] its spot in our [00:02:40] textbooks. [00:02:41] If we study this [00:02:42] other car now, [00:02:43] but [00:02:44] zoom in only [00:02:45] on this part of [00:02:46] its movement, we [00:02:47] have an object [00:02:48] moving at a constant [00:02:49] speed. Rise [00:02:50] over run [00:02:51] becomes a trivial problem [00:02:52] because I can choose [00:02:53] any two points, [00:02:54] and I get the [00:02:55] same answer [00:02:56] for what the speed [00:02:57] was.
+
+The maths [00:02:58] we know is perfectly [00:02:59] capable of [00:03:00] describing the rate of [00:03:01] change in this [00:03:02] case. The [00:03:03] trouble starts when [00:03:04] the rate of change [00:03:05] itself keeps [00:03:06] changing [00:03:07] because then the [00:03:08] answer depends on [00:03:09] which two points [00:03:10] we pick. This [00:03:11] is precisely the [00:03:12] problem that calculus [00:03:13] was invented to [00:03:14] solve. The [00:03:15] branch we'll be working with [00:03:16] is called [00:03:17] differential calculus, [00:03:18] and what we're trying to [00:03:19] compute, the [00:03:20] rate of [00:03:21] change at a single [00:03:22] moment, is called a [00:03:23] [00:03:24] [00:03:25] derivative.
+
+
+[00:03:25] Making better guesses
+---
+
+[00:03:26] Going back to the car [00:03:27] speedometer for a [00:03:28] second now, can [00:03:29] we draw some [00:03:30] inspiration from the [00:03:31] real-life [00:03:32] engineering of this [00:03:33] speedometer? [00:03:34] After all, [00:03:35] most speedometers [00:03:36] conceptually [00:03:37] work the same. [00:03:38] They receive [00:03:39] data from [00:03:40] sensors which measure how [00:03:41] many times the [00:03:42] wheels turn in a [00:03:43] short window of [00:03:44] time. So [00:03:45] with our t [00:03:46] equals four seconds [00:03:47] point set, [00:03:48] let's take a [00:03:49] very small interval, [00:03:50] say, a 10th of a [00:03:51] second [00:03:52] later.
+
+[00:03:53] Suppose the car has traveled [00:03:54] 80 meters [00:03:55] by the first [00:03:56] point and [00:03:57] [00:03:58] 84.05 [00:03:59] meters by the [00:04:00] second point. [00:04:01] Rise over run [00:04:02] gives us [00:04:03] 4.05 [00:04:04] meters divided [00:04:05] by 0.1 [00:04:06] seconds, which is [00:04:07] [00:04:08] 40.5 [00:04:09] meters per second. [00:04:10] The straight [00:04:11] line through these two [00:04:12] points is called a [00:04:13] secant, [00:04:14] a word you may [00:04:15] have met in circle [00:04:16] geometry, and its [00:04:17] gradient [00:04:18] is the average [00:04:19] speed of the car [00:04:20] in this small [00:04:21] window of time
+
+[00:04:22] This works just [00:04:23] like the speedometer [00:04:24] and is a much better [00:04:25] answer than the [00:04:26] average speed of [00:04:27] twenty-five meters per second. [00:04:28] But it's [00:04:29] still an average, [00:04:30] and it still depends on the [00:04:31] window we choose. [00:04:32] If we take a [00:04:33] hundredth of a [00:04:34] second instead, we [00:04:35] get forty [00:04:36] point o five meters [00:04:37] per second. [00:04:38] This is where [00:04:39] the new maths [00:04:40] begins.
+
+
+[00:04:40] Making the interval arbitrarily small
+---
+
+[00:04:41] If a small window is [00:04:42] a good idea [00:04:43] and a smaller [00:04:44] window is an even better [00:04:45] idea, then [00:04:46] let's not pick a window [00:04:47] size at all. [00:04:48] Let's postpone that [00:04:49] decision as much as [00:04:50] possible and call the [00:04:51] length of that [00:04:52] window H, [00:04:53] and let's [00:04:54] see what happens when [00:04:55] H gets smaller [00:04:56] and smaller.[00:04:57] 
+
+A lot of maths is [00:04:58] just this, by the [00:04:59] way, being stubborn [00:05:00] and using a [00:05:01] letter instead of a value [00:05:02] for as long [00:05:03] as possible. [00:05:04] Let's say that [00:05:05] while the car is [00:05:06] speeding up, its [00:05:07] distance after T [00:05:08] seconds is [00:05:09] given by the function
+
+[00:05:10] S of t [00:05:11] equals five [00:05:12] times t [00:05:13] squared.
+
+After four [00:05:14] seconds, the [00:05:15] distance is eighty [00:05:16] meters, and after [00:05:17] four point one [00:05:18] seconds, it's [00:05:19] eighty-four point o [00:05:20] five meters.
+
+
+[00:05:20] Doing algebra
+---
+
+[00:05:21] The average speed [00:05:22] over a window of [00:05:23] length h [00:05:24] starting at time t [00:05:25] is rise [00:05:26] over run [00:05:27] So the distance [00:05:28] at the end of the window, [00:05:29] which is five [00:05:30] times t plus [00:05:31] h all [00:05:32] squared, [00:05:33] minus the [00:05:34] distance at the start, which [00:05:35] is five times [00:05:36] t squared, [00:05:37] all divided by [00:05:38] h, the length of [00:05:39] the [00:05:40] interval.
+
+With a little bit of [00:05:41] binomial [00:05:42] expansion [00:05:43] here, the top [00:05:44] becomes five times [00:05:45] t squared plus [00:05:46] ten times th [00:05:47] plus [00:05:48] five times h [00:05:49] squared minus [00:05:50] five times t [00:05:51] squared. [00:05:52] The five times t [00:05:53] squared cancels [00:05:54] out, and it [00:05:55] makes sense that it [00:05:56] does.
+
+The [00:05:57] average speed [00:05:58] of a window [00:05:59] shouldn't depend on where [00:06:00] the car was when [00:06:01] the window opened. [00:06:02] Here, we are allowed [00:06:03] to simplify the fraction [00:06:04] by H, [00:06:05] because remember that [00:06:06] H itself [00:06:07] is a real [00:06:08] non-zero window length.
+
+
+[00:06:09] Squeezing the speed at an instant
+---
+
+[00:06:09] 
+
+What [00:06:10] remains after the [00:06:11] cancellation is ten times [00:06:12] T plus [00:06:13] five times H. [00:06:14] And what is [00:06:15] this really? What we [00:06:16] arrived at is a [00:06:17] function that tells us the [00:06:18] average speed [00:06:19] of the car [00:06:20] over a window that [00:06:21] starts at time [00:06:22] T and lasts [00:06:23] H seconds, [00:06:24] where H is just a [00:06:25] length that we [00:06:26] haven't chosen yet.
+
+[00:06:27] At four seconds, [00:06:28] the average over the [00:06:29] window is forty [00:06:30] plus five [00:06:31] times h. [00:06:32] A window of a [00:06:33] tenth of a second [00:06:34] gives forty point [00:06:35] five meters per [00:06:36] second. A [00:06:37] hundredth of [00:06:38] a second gives [00:06:39] forty point o five. [00:06:40] A thousandth [00:06:41] gives forty point [00:06:42] o o five meters per [00:06:43] second, and so [00:06:44] on. Now, the [00:06:45] curious among us [00:06:46] might also check [00:06:47] intervals before [00:06:48] our t equals [00:06:49] four seconds point [00:06:50] just to see what [00:06:51] happens.
+
+Since the car is [00:06:52] speeding up the whole [00:06:53] time, its [00:06:54] speed at the [00:06:55] instant must [00:06:56] sit between the [00:06:57] average just [00:06:58] before and the average [00:06:59] just after.
+
+There [00:07:00] is exactly one [00:07:01] number that stays [00:07:02] between the two columns [00:07:03] on every row, [00:07:04] however far down [00:07:05] you go, and that number [00:07:06] is forty.[00:07:07] 
+
+Try [00:07:08] any other number, [00:07:09] say forty point [00:07:10] oh oh one, [00:07:11] and we can [00:07:12] find a window small [00:07:13] enough, say a [00:07:14] ten-thousandth of a [00:07:15] second, for which [00:07:16] the average speed is [00:07:17] forty point [00:07:18] oh oh oh [00:07:19] five, no [00:07:20] longer trapping our [00:07:21] guess.
+
+
+[00:07:21] Payoff
+---
+
+So [00:07:22] finally, we have arrived [00:07:23] at the definition that [00:07:24] we were missing. [00:07:25] The speed [00:07:26] at an instant [00:07:27] is the number [00:07:28] the averages [00:07:29] close in on [00:07:30] from both sides [00:07:31] as the window [00:07:32] becomes smaller [00:07:33] and smaller.
+
+[00:07:34] For our car [00:07:35] at four seconds, that [00:07:36] number is forty meters per [00:07:37] second. [00:07:38] Mathematicians have a name [00:07:39] for this kind of number. [00:07:40] The number a [00:07:41] quantity closes [00:07:42] in on as [00:07:43] something else shrinks to [00:07:44] zero, and [00:07:45] it's called a limit. [00:07:46] It's written [00:07:47] like this: [00:07:48] lim with [00:07:49] h [00:07:50] arrow zero [00:07:51] underneath in [00:07:52] front of the expression. [00:07:53] We read it [00:07:54] as the limit, [00:07:55] as h approaches [00:07:56] zero of [00:07:57] forty plus [00:07:58] five times h,
+
+[00:07:59] And it means [00:08:00] the one number [00:08:01] that this expression [00:08:02] gets as [00:08:03] close as we like [00:08:04] to from either [00:08:05] side as h [00:08:06] shrinks, without h [00:08:07] ever being [00:08:08] zero. And if we don't [00:08:09] plug in four seconds [00:08:10] but keep t [00:08:11] in this expression, [00:08:12] the same [00:08:13] reasoning turns [00:08:14] ten times t [00:08:15] plus five h [00:08:16] into ten [00:08:17] times t. [00:08:18] Observe the same thing [00:08:19] graphically [00:08:20] now.
+
+And as h [00:08:21] gets smaller and [00:08:22] smaller, our two [00:08:23] secants get [00:08:24] closer and closer [00:08:25] until they settle on [00:08:26] one particular line. [00:08:27] That line is the [00:08:28] tangent to the curve [00:08:29] at four [00:08:30] seconds. As we [00:08:31] might expect, [00:08:32] the gradient of the [00:08:33] tangent is the [00:08:34] speed at that [00:08:35] instant.
+
+
+[00:08:35] Differentiation
+---
+
+[00:08:36] But now let's step [00:08:37] back and [00:08:38] look at what we actually [00:08:39] achieved. [00:08:40] We wrote rise [00:08:41] over run for a [00:08:42] window of length [00:08:43] h. We refused to [00:08:44] choose h, [00:08:45] we did the [00:08:46] algebra, And then we [00:08:47] asked where the [00:08:48] answer heads as [00:08:49] h shrinks [00:08:50] to zero from both [00:08:51] sides. [00:08:52] Written out in [00:08:53] general for any function [00:08:54] s of t, [00:08:55] the whole procedure [00:08:56] is this [00:08:57] This is a [00:08:58] derivative, and the act of [00:08:59] taking the limit [00:09:00] of rise over [00:09:01] run is [00:09:02] called differentiating [00:09:03] the function.
+
+[00:09:04] We read S [00:09:05] dash of t [00:09:06] as the [00:09:07] derivative of S. 
+
+
+[00:09:07] The textbook rule
+---
+
+[00:09:08] One more seemingly minor [00:09:09] thing to notice, but worth [00:09:10] pointing out. The [00:09:11] derivative of five [00:09:12] times t squared is [00:09:13] itself also a [00:09:14] function of t, [00:09:15] namely ten [00:09:16] times t. [00:09:17] It lets us find the [00:09:18] speed at every [00:09:19] moment of the trip. [00:09:20] Ten meters per second [00:09:21] after one second, [00:09:22] twenty after two, [00:09:23] fifty after [00:09:24] five.[00:09:25] 
+
+And if you've seen a [00:09:26] textbook rule for [00:09:27] derivatives, you've [00:09:28] already met this [00:09:29] result. The rule [00:09:30] says bring the [00:09:31] power down in front [00:09:32] and knock one [00:09:33] off the power. [00:09:34] Five [00:09:35] times t squared [00:09:36] becomes two [00:09:37] times five [00:09:38] times t, which [00:09:39] is ten times t, [00:09:40] exactly what the [00:09:41] limit gave us
+
+
+[00:09:41] Doulbe derivative
+---
+
+[00:09:42] Since the derivative [00:09:43] itself is [00:09:44] also a function, [00:09:45] does that mean that we can [00:09:46] also say something [00:09:47] about its rate of [00:09:48] change?[00:09:49] 
+
+Turns out we can. [00:09:50] Running the same [00:09:51] procedure on ten times [00:09:52] T, the [00:09:53] average change over a [00:09:54] window of length [00:09:55] H is [00:09:56] ten times [00:09:57] T plus H [00:09:58] minus ten [00:09:59] times T over [00:10:00] H, which is just [00:10:01] ten. [00:10:02] So the speed [00:10:03] goes up by ten [00:10:04] meters per second every [00:10:05] second, and [00:10:06] what comes out of [00:10:07] differentiating [00:10:08] twice is the car's [00:10:09] [00:10:10] acceleration.
+
+But [00:10:11] differentiation produces [00:10:12] meaningful function [00:10:13] in numbers [00:10:14] in many domains. [00:10:15] Take the total number [00:10:16] of cases in an [00:10:17] epidemic. Its [00:10:18] derivative is [00:10:19] new cases per day, [00:10:20] and the derivative of [00:10:21] that tells [00:10:22] you whether the [00:10:23] outbreak is speeding [00:10:24] up or slowing down.[00:10:25] 
+
+When we [00:10:26] were hearing news about the [00:10:27] curve flattening in [00:10:28] twenty twenty, [00:10:29] what they meant was that we [00:10:30] were still getting new [00:10:31] cases every day, just [00:10:32] at a decreasing [00:10:33] rate compared to the day [00:10:34] [00:10:35] before.
+
+Whenever you ask [00:10:36] how fast something is [00:10:37] changing, you're asking for [00:10:38] a derivative. [00:10:39] Whenever you ask whether [00:10:40] that change is speeding up or [00:10:41] slowing down, you're [00:10:42] asking for the derivative [00:10:43] of a derivative.
+
+
+[00:10:43] Conclusion
+---
+
+[00:10:44] And that's it for this [00:10:45] video. In the [00:10:46] next video, we'll [00:10:47] go back to the shortcut we [00:10:48] saw earlier, [00:10:49] bringing the power down and [00:10:50] knocking one off, [00:10:51] and prove that it works [00:10:52] for any power of T, [00:10:53] not just T [00:10:54] squared. Once [00:10:55] we have that, we [00:10:56] won't need to take a limit [00:10:57] every time we [00:10:58] want a [00:10:59] derivative.
+
+And then [00:11:00] there's the reverse question. [00:11:01] If you [00:11:02] only know the speed [00:11:03] at every moment, [00:11:04] can you work out how [00:11:05] far you've gone? [00:11:06] That's the other half of [00:11:07] calculus called [00:11:08] integration, and [00:11:09] it's a story for [00:11:10] another video. 
+
