@@ -8,17 +8,50 @@ Manim source for the Mathspace sample video. Scene numbers match the storyboard 
   components every part reuses (road, car, clock, axes, `CurveTracker`,
   speedometer, `fraction`, `dotted`).
 - `timeline.py`: times scenes to the narration. Scenes name words, not seconds.
-- `narration/part2.txt`: the script text for part 2, used for estimated timing
-  until there's a recording.
+- `narration/part1.txt` to `narration/part6.txt`: the script text for each part,
+  used for estimated timing until there's a recording.
 - `narration/transcript.txt`: the Descript transcript export, once you have one
   (not there yet).
+- `part1_intro.py`: part 1 (rows 1.1 to 1.3) and the handoff into part 2.
 - `part2_question.py`: part 2, one method per storyboard row.
+- `part3_limits_of_old_maths.py`: part 3; opens on part 2's last frame.
+- `part4a_windows.py`: part 4, rows 4.1 to 4.21 (speedometer to 10t + 5h).
+- `part4b_limit.py`: part 4, rows 4.22 to 4.33 (two-sided limit to the power rule).
+- `part5_twice.py`: part 5, rows 5.1 to 5.9 (differentiating twice; the same stack of derivatives for an epidemic and a coil). 5.4 and 5.5 are empty in the storyboard.
+- `part6_next.py`: part 6, rows 6.1 to 6.5 (next video, three uses of derivatives, integration, end card).
+
+Each part opens on the frame the previous part ends on. The end state is built by
+one function (`GraphStage` in `style.py`, `part3_ending()`, `part4a_ending()`, `part4b_ending()`, `part5_ending()`), and
+the next part calls the same function, so the frames always match.
 - `renders/`: rendered clips.
 
 ## Rendering
 
-    .venv/bin/manim -pql part2_question.py Part2                          # quick preview
-    .venv/bin/manim -qh --fps 30 --save_sections part2_question.py Part2  # final, one clip per row
+    .venv/bin/manim -pql part1_intro.py Part1                             # quick preview
+    .venv/bin/manim -qh --fps 30 --save_sections part1_intro.py Part1     # final, one clip per row
+    .venv/bin/manim -qh --fps 30 --save_sections part2_question.py Part2
+    .venv/bin/manim -qh --fps 30 --save_sections part3_limits_of_old_maths.py Part3
+    .venv/bin/manim -qh --fps 30 --save_sections part4a_windows.py Part4a
+    .venv/bin/manim -qh --fps 30 --save_sections part4b_limit.py Part4b
+    .venv/bin/manim -qh --fps 30 --save_sections part5_twice.py Part5
+    .venv/bin/manim -qh --fps 30 --save_sections part6_next.py Part6
+
+Parts 4 to 6 use LaTeX for formulas. To render it on a Mac, install BasicTeX
+(`brew install --cask basictex`), open a new terminal, then:
+
+    sudo tlmgr update --self
+    sudo tlmgr install standalone preview dvisvgm sansmath helvet
+
+## Joining parts
+
+Each part ends on the frame the next part starts on, so clips butt together
+without a visible cut. Part 1 finishes its narration, then a short handoff
+(section `1.4_handoff`, about 2.5 s, no narration) fades the graphs and grows
+the small car into part 2's car on the road, with the clock at 0.0 s. Part 2
+starts with that road, car and clock already on screen (`opening_layout()` in
+`style.py` builds them for both). In Descript, leave a pause of about 2.5 s in
+the voice between the two parts, or lay the handoff clip under the start of
+part 2's first sentence.
 
 Per-row clips land in `media/videos/part2_question/1080p30/sections/`. No audio
 is rendered; the voice goes on top in Descript.
