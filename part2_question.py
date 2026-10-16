@@ -15,14 +15,15 @@ from style import *
 
 class Part2(LessonScene):
     SCRIPT = "narration/part2.txt"
+    START = ('study "change"', 1.7)         # where part 1's handoff ends
+    NEXT_START = "What's the speed of the car"
 
     def construct(self):
         # Shared state: one time value drives car, clock, graph dot and speedometer.
         self.t = ValueTracker(0)
         self.motion = Motion()
-        self.road = make_road()
-        self.car = car_on_road(self.t, self.motion)
-        self.clock = make_clock(self.t)
+        self.road, self.car, self.clock = opening_layout(self.t, self.motion)
+        self.add(self.road, self.car, self.clock)   # already on screen: part 1 ends on this frame
         self.axes, self.axis_labels = make_axes()
         self.p0 = self.axes.c2p(0, 0)
         self.p1 = self.axes.c2p(T_TOTAL, D_TOTAL)
@@ -46,7 +47,6 @@ class Part2(LessonScene):
     # ------------------------------------------------------------------
     def row_2_1(self):
         self.row("2.1_trip", "Let's look at this")
-        self.at("Let's look at this", FadeIn(self.road), FadeIn(self.car), FadeIn(self.clock), run_time=1.0)
         self.span("a car starting from rest", "stopping at the end", self.drive_to(T_TOTAL), rate_func=linear)
 
     # ------------------------------------------------------------------
@@ -76,8 +76,8 @@ class Part2(LessonScene):
         self.row("2.4_two_points", "Well, we can say")
         self.start_pt = labelled_dot(self.p0, "(0 s, 0 m)", UR)
         self.end_pt = labelled_dot(self.p1, "(10 s, 250 m)", RIGHT)
-        self.at("took 10 seconds", FadeIn(self.start_pt, scale=0.6))
-        self.at("cover 250 metres", FadeIn(self.end_pt, scale=0.6))
+        self.at("took ten seconds", FadeIn(self.start_pt, scale=0.6))
+        self.at("to cover two hundred and", FadeIn(self.end_pt, scale=0.6))
 
     # ------------------------------------------------------------------
     # 2.5  A straight line would mean an instant jump in speed
@@ -97,7 +97,7 @@ class Part2(LessonScene):
 
         self.at("infinite acceleration",
                 self.straight.animate.set_color(MUTED).set_stroke(width=3),
-                FadeOut(line_dot), FadeOut(self.start_pt[1]), run_time=1.0)
+                FadeOut(line_dot), FadeOut(self.start_pt[1]), run_time=0.7)
         self.motion.use(s, v_parked)          # needle stays at 0 while rewinding
         self.at("which we know", self.drive_to(0), run_time=1.0, rate_func=smooth)
         self.motion.use(s, v)
@@ -130,11 +130,11 @@ class Part2(LessonScene):
                 run_time=1.6)
         # the two values leave the chart and become the fraction
         frac = self.chain["frac"]
-        self.at("250 metres divided by",
+        self.at("two hundred and fifty meters divided by",
                 FadeIn(self.heading),
                 ReplacementTransform(dist_val, frac[0]), ReplacementTransform(time_val, frac[2]),
                 Create(frac[1]), run_time=1.4)
-        self.at("meaning 25", FadeIn(self.chain["eq3"]), FadeIn(self.chain["result"], shift=LEFT * 0.2))
+        self.at("meaning twenty", FadeIn(self.chain["eq3"]), FadeIn(self.chain["result"], shift=LEFT * 0.2))
 
     def build_formula_chain(self):
         """gradient(A) = rise/run = 250 m / 10 s = 25 m/s, plus its heading."""
