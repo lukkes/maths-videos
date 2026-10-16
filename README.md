@@ -10,15 +10,16 @@ Manim source for the Mathspace sample video. Scene numbers match the storyboard 
 - `timeline.py`: times scenes to the narration. Scenes name words, not seconds.
 - `narration/part1.txt` to `narration/part6.txt`: the script text for each part,
   used for estimated timing until there's a recording.
-- `narration/transcript.txt`: the Descript transcript export, once you have one
-  (not there yet).
+- `narration/transcript.txt`: the Descript transcript export. Chapter headings in it
+  (a line with --- under it) are ignored. Each clip ends where the next part starts in
+  the recording, so the clips laid end to end from 0:00 line up with the audio.
 - `part1_intro.py`: part 1 (rows 1.1 to 1.3) and the handoff into part 2.
 - `part2_question.py`: part 2, one method per storyboard row.
 - `part3_limits_of_old_maths.py`: part 3; opens on part 2's last frame.
 - `part4a_windows.py`: part 4, rows 4.1 to 4.21 (speedometer to 10t + 5h).
 - `part4b_limit.py`: part 4, rows 4.22 to 4.33 (two-sided limit to the power rule).
-- `part5_twice.py`: part 5, rows 5.1 to 5.9 (differentiating twice; the same stack of derivatives for an epidemic and a coil). 5.4 and 5.5 are empty in the storyboard.
-- `part6_next.py`: part 6, rows 6.1 to 6.5 (next video, three uses of derivatives, integration, end card).
+- `part5_twice.py`: part 5, rows 5.1, 5.2, 5.3, 5.6, 5.7, 5.9 (differentiating twice; the same stack of derivatives for an epidemic; 5.9 shows car, epidemic and wire side by side).
+- `part6_next.py`: part 6, rows 6.1, 6.2, 6.4, 6.5 (next video, integration, end card).
 
 Each part opens on the frame the previous part ends on. The end state is built by
 one function (`GraphStage` in `style.py`, `part3_ending()`, `part4a_ending()`, `part4b_ending()`, `part5_ending()`), and
